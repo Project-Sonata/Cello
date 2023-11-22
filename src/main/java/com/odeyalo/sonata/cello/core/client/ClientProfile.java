@@ -1,4 +1,4 @@
-package com.odeyalo.sonata.cello.core;
+package com.odeyalo.sonata.cello.core.client;
 
 /**
  * Describe client profile based on Oauth2 Specification

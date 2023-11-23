@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -18,11 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureWebTestClient
 class AuthorizeEndpointTest {
 
-    public static final String RESPONSE_TYPE = "response_type";
-    public static final String CLIENT_ID = "client_id";
-    public static final String REDIRECT_URI = "redirect_uri";
-    public static final String SCOPE = "scope";
-    public static final String STATE = "state";
     @Autowired
     WebTestClient webTestClient;
 

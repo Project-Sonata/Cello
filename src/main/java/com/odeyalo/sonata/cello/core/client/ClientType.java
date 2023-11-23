@@ -1,4 +1,4 @@
-package com.odeyalo.sonata.cello.core;
+package com.odeyalo.sonata.cello.core.client;
 
 public enum ClientType {
     /**

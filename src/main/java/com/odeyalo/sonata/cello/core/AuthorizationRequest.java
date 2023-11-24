@@ -14,6 +14,6 @@ public class AuthorizationRequest {
     String responseType;
     String clientId;
     String redirectUri;
-    String scope;
+    ScopeContainer scopes;
     String state;
 }

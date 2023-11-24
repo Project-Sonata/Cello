@@ -24,14 +24,14 @@ public class StateAuthorizationRequestCreationStage implements AuthorizationRequ
 
         MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
 
-        String responseType = queryParams.getFirst(STATE);
+        String state = queryParams.getFirst(STATE);
 
-        if ( responseType == null ) {
+        if ( state == null ) {
             return Mono.error(AuthorizationRequestCreationException.withCustomMessage(format("Missed %s parameter", STATE)));
         }
 
         return Mono.just(
-                prev.state(responseType)
+                prev.state(state)
         );
     }
 }

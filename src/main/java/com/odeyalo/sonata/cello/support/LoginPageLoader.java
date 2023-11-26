@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 /**
  * Provide the login page to return to the user as Flux of bytes
  */
-public interface LoginPageProvider {
+public interface LoginPageLoader {
 
     @NotNull
     Flux<ByteBuffer> getLoginPage();

@@ -29,6 +29,5 @@ public class Oauth2Controller {
                         .contentType(TEXT_HTML)
                         .body(new String(bytes))
                 );
-
     }
 }

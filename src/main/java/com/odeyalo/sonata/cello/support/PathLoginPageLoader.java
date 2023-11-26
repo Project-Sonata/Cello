@@ -12,11 +12,11 @@ import java.nio.file.Path;
 /**
  * Provide the login page from provided path
  */
-public class PathLoginPageProvider implements LoginPageProvider {
+public class PathLoginPageLoader implements LoginPageLoader {
     private final String htmlPagePath;
     private final ReactiveFileReader reactiveFileReader;
 
-    public PathLoginPageProvider(String htmlPagePath, ReactiveFileReader reactiveFileReader) {
+    public PathLoginPageLoader(String htmlPagePath, ReactiveFileReader reactiveFileReader) {
         Assert.state(Files.exists(Path.of(htmlPagePath)), "Invalid path to html file was provided");
         this.reactiveFileReader = reactiveFileReader;
         this.htmlPagePath = htmlPagePath;

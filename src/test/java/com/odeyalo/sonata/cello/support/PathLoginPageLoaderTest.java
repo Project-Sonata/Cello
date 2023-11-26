@@ -8,7 +8,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class PathLoginPageProviderTest {
+class PathLoginPageLoaderTest {
     final String HTML_CONTENT = """
             <!DOCTYPE html>
             <html lang="en">
@@ -25,7 +25,7 @@ class PathLoginPageProviderTest {
 
     @Test
     void shouldReadFromFileAndReturnAsFlux() {
-        var testable = new PathLoginPageProvider(HTML_PAGE_PATH, new RxIoReactiveFileReader());
+        var testable = new PathLoginPageLoader(HTML_PAGE_PATH, new RxIoReactiveFileReader());
 
         List<String> strings = testable.getLoginPage()
                 .map((buffer -> new String(buffer.array())))
@@ -43,7 +43,7 @@ class PathLoginPageProviderTest {
 
     @Test
     void shouldFailFastIfFilePathNotExist() {
-        assertThatThrownBy(() -> new PathLoginPageProvider("not_exist.html", new RxIoReactiveFileReader()))
+        assertThatThrownBy(() -> new PathLoginPageLoader("not_exist.html", new RxIoReactiveFileReader()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Invalid path to html file was provided");
     }

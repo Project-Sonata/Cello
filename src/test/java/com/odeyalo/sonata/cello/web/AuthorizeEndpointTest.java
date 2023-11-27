@@ -44,7 +44,7 @@ class AuthorizeEndpointTest {
         void shouldReturnHtmlContentType() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectHeader().contentType(MediaType.TEXT_HTML);
+            responseSpec.expectHeader().contentType("text/html;charset=UTF-8");
         }
 
         @Test

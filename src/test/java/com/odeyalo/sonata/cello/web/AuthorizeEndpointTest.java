@@ -1,4 +1,4 @@
-package com.odeyalo.sonata.cello.client.web;
+package com.odeyalo.sonata.cello.web;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
@@ -8,8 +8,14 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
 @AutoConfigureWebTestClient
+@ActiveProfiles("test")
 class AuthorizeEndpointTest {
 
     @Autowired
@@ -37,16 +44,19 @@ class AuthorizeEndpointTest {
         void shouldReturnHtmlContentType() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectHeader().contentType(MediaType.TEXT_HTML);
+            responseSpec.expectHeader().contentType("text/html;charset=UTF-8");
         }
 
         @Test
-        void shouldReturnHtmlBody() {
+        void shouldReturnHtmlBody() throws IOException {
+            File loginHtmlPage = new ClassPathResource("static/login-page.html").getFile();
+            String html = new String(Files.readAllBytes(loginHtmlPage.toPath()));
+
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
             String htmlBody = responseSpec.expectBody(String.class).returnResult().getResponseBody();
 
-            assertThat(htmlBody).isEqualTo("<p1>Hello from Cello server</p1>");
+            assertThat(htmlBody).isEqualTo(html);
         }
 
         @Test

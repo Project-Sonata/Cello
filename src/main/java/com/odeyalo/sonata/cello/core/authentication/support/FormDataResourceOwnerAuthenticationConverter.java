@@ -21,6 +21,7 @@ public class FormDataResourceOwnerAuthenticationConverter implements ResourceOwn
     public Mono<ResourceOwnerPreAuthentication> convert(ReactiveHttpRequest httpRequest) {
         return httpRequest.getFormData()
                 .flatMap(FormDataResourceOwnerAuthenticationConverter::validateRequest)
+                .log()
                 .map(this::createAuthentication);
     }
 
@@ -29,7 +30,8 @@ public class FormDataResourceOwnerAuthenticationConverter implements ResourceOwn
         if ( !formData.containsKey("username") || !formData.containsKey("password") ) {
             return Mono.empty();
         }
-        return Mono.just(formData);
+        return Mono.just(formData)
+                .log();
     }
 
     @NotNull

@@ -29,6 +29,9 @@ class AuthorizeEndpointTest {
     @Autowired
     WebTestClient webTestClient;
 
+    final String AUTHENTICATION_COOKIE_NAME = "clid";
+    final String AUTHENTICATION_COOKIE_VALUE = "odeyalo";
+
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
     class ValidRequestTest {
@@ -44,19 +47,7 @@ class AuthorizeEndpointTest {
         void shouldReturnHtmlContentType() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectHeader().contentType("text/html;charset=UTF-8");
-        }
-
-        @Test
-        void shouldReturnHtmlBody() throws IOException {
-            File loginHtmlPage = new ClassPathResource("static/login-page.html").getFile();
-            String html = new String(Files.readAllBytes(loginHtmlPage.toPath()));
-
-            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
-
-            String htmlBody = responseSpec.expectBody(String.class).returnResult().getResponseBody();
-
-            assertThat(htmlBody).isEqualTo(html);
+            responseSpec.expectHeader().contentType(MediaType.TEXT_HTML);
         }
 
         @Test
@@ -70,6 +61,7 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -86,6 +78,7 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -102,6 +95,7 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -118,6 +112,7 @@ class AuthorizeEndpointTest {
                                     .queryParam(REDIRECT_URI, "http://localhost:4000")
                                     .queryParam(STATE, "opaque")
                                     .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -134,6 +129,7 @@ class AuthorizeEndpointTest {
                                     .queryParam(REDIRECT_URI, "http://localhost:4000")
                                     .queryParam(SCOPE, "read write")
                                     .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -151,6 +147,7 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
         }
     }

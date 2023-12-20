@@ -1,10 +1,11 @@
 package com.odeyalo.sonata.cello.core;
 
+import com.odeyalo.sonata.cello.support.utils.CollectionUtils;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.util.Assert;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,46 +19,51 @@ import java.util.List;
 @Builder
 public class ScopeContainer implements Iterable<Scope> {
     @Singular
-    List<Scope> items;
+    List<Scope> scopes;
 
-    public static ScopeContainer single(Scope scope) {
-        Assert.notNull(scope, "Scope cannot be null!");
-        return builder().item(scope).build();
+    public static ScopeContainer empty() {
+        return builder().build();
     }
 
-    public static ScopeContainer fromItems(Scope... scopes) {
-        return fromCollection(List.of(scopes));
+    public static ScopeContainer singleScope(Scope scope) {
+        return builder().scope(scope).build();
     }
 
     public static ScopeContainer fromCollection(Collection<? extends Scope> scopes) {
-        Assert.notNull(scopes, "Scopes cannot be null!");
-        Assert.noNullElements(scopes, "Collection cannot contain null value!");
-        return builder().items(scopes).build();
+        return builder().scopes(scopes).build();
+    }
+
+    public static ScopeContainer fromArray(Scope... scopes) {
+        return builder().scopes(List.of(scopes)).build();
     }
 
     public int size() {
-        return getItems().size();
-    }
-
-    public boolean containsAll(@NotNull Collection<Scope> c) {
-        return new HashSet<>(getItems()).containsAll(c); // wrap in HashSet for optimization purposes
+        return getScopes().size();
     }
 
     public boolean isEmpty() {
-        return getItems().isEmpty();
+        return getScopes().isEmpty();
     }
 
-    public boolean contains(Scope o) {
-        return getItems().contains(o);
+    public boolean contains(Scope scope) {
+        return getScopes().contains(scope);
     }
 
+    public boolean containsAll(@NotNull Collection<Scope> scopes) {
+        return new HashSet<>(getScopes()).containsAll(scopes);
+    }
+
+    @Nullable
     public Scope get(int index) {
-        return getItems().get(index);
+        if ( CollectionUtils.isOutOfBounds(scopes, index) ) {
+            return null;
+        }
+        return getScopes().get(index);
     }
 
     @NotNull
     @Override
     public Iterator<Scope> iterator() {
-        return null;
+        return scopes.iterator();
     }
 }

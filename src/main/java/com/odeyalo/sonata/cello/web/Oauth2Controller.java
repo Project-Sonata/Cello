@@ -1,10 +1,16 @@
 package com.odeyalo.sonata.cello.web;
 
 import com.odeyalo.sonata.cello.core.AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationExchange;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
+import com.odeyalo.sonata.cello.core.Oauth2ResponseTypeHandler;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
 import com.odeyalo.sonata.cello.spring.auth.CelloOauth2CookieResourceOwnerAuthentication;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -24,6 +30,11 @@ public class Oauth2Controller {
     private final ResourceOwnerAuthenticator resourceOwnerAuthenticationManager;
     private final AuthenticationPageProvider authenticationPageProvider;
 
+    @Autowired
+    private Oauth2AuthorizationResponseConverter converter;
+    @Autowired
+    private Oauth2ResponseTypeHandler oauth2ResponseTypeHandler;
+
     public Oauth2Controller(ResourceOwnerAuthenticator resourceOwnerAuthenticationManager,
                             AuthenticationPageProvider authenticationPageProvider) {
 
@@ -33,15 +44,15 @@ public class Oauth2Controller {
 
     @GetMapping(value = "/authorize")
     @ResponseBody
-    public Mono<ResponseEntity<String>> handleAuthorize(AuthorizationRequest request,
-                                                        @AuthenticationPrincipal CelloOauth2CookieResourceOwnerAuthentication token) {
+    public Mono<Void> handleAuthorize(AuthorizationRequest request,
+                                      ServerWebExchange exchange,
+                                      @AuthenticationPrincipal CelloOauth2CookieResourceOwnerAuthentication token) {
 
-        return Mono.just(
-                        ResponseEntity.ok()
-                                .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML_VALUE)
-                                .body("You are: " + token.getPrincipal() + " Permissions: " + request.getScopes())
-
-                )
+        return oauth2ResponseTypeHandler.permissionGranted(request, ResourceOwner.withPrincipalOnly("odeyalo"))
+                .flatMap(response -> converter.convert(
+                        new Oauth2AuthorizationExchange(request, response),
+                        exchange
+                )).then()
                 .log("Cello-Oauth2-Resource-Owner-Auth", Level.FINE);
     }
 

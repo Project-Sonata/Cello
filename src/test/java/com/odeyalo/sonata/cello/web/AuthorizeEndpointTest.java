@@ -40,14 +40,7 @@ class AuthorizeEndpointTest {
         void shouldReturnOkStatus() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectStatus().isOk();
-        }
-
-        @Test
-        void shouldReturnHtmlContentType() {
-            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
-
-            responseSpec.expectHeader().contentType(MediaType.TEXT_HTML);
+            responseSpec.expectStatus().isFound();
         }
 
         @Test

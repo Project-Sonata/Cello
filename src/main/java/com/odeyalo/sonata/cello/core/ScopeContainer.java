@@ -1,9 +1,7 @@
 package com.odeyalo.sonata.cello.core;
 
 import com.odeyalo.sonata.cello.support.utils.CollectionUtils;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +17,7 @@ import java.util.List;
 @Builder
 public class ScopeContainer implements Iterable<Scope> {
     @Singular
+    @Getter(value = AccessLevel.PRIVATE)
     List<Scope> scopes;
 
     public static ScopeContainer empty() {

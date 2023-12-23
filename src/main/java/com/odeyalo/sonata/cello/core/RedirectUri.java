@@ -7,18 +7,18 @@ import java.net.URISyntaxException;
 
 /**
  * Wrapper for Redirect uri
- * @param uri - uri to wrap, must be valid. Otherwise RedirectUri cannot be constructed and exception will be thrown
+ *
+ * @param uriString - uri as string to wrap, must be valid. Otherwise, RedirectUri cannot be constructed and exception will be thrown
  */
-public record RedirectUri(String uri) {
+public record RedirectUri(String uriString) {
 
-    public RedirectUri(String uri) {
-        Assert.notNull(uri, "Uri must be not null!");
-        Assert.state(isUriValid(uri), "Uri must be valid!");
-        this.uri = uri;
+    public RedirectUri {
+        Assert.notNull(uriString, "Uri must be not null!");
+        Assert.state(isUriValid(uriString), "Uri must be valid!");
     }
 
-    public URI asUri() {
-        return URI.create(uri);
+    public static RedirectUri create(String uri) {
+        return new RedirectUri(uri);
     }
 
     private boolean isUriValid(String uri) {

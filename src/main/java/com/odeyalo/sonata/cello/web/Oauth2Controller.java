@@ -1,7 +1,6 @@
 package com.odeyalo.sonata.cello.web;
 
-import com.odeyalo.sonata.cello.core.AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationExchange;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
 import com.odeyalo.sonata.cello.core.Oauth2ResponseTypeHandler;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
@@ -9,10 +8,6 @@ import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
 import com.odeyalo.sonata.cello.spring.auth.CelloOauth2CookieResourceOwnerAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -44,13 +39,13 @@ public class Oauth2Controller {
 
     @GetMapping(value = "/authorize")
     @ResponseBody
-    public Mono<Void> handleAuthorize(AuthorizationRequest request,
+    public Mono<Void> handleAuthorize(Oauth2AuthorizationRequest request,
                                       ServerWebExchange exchange,
                                       @AuthenticationPrincipal CelloOauth2CookieResourceOwnerAuthentication token) {
 
         return oauth2ResponseTypeHandler.permissionGranted(request, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .flatMap(response -> converter.convert(
-                        new Oauth2AuthorizationExchange(request, response),
+                        response,
                         exchange
                 )).then()
                 .log("Cello-Oauth2-Resource-Owner-Auth", Level.FINE);

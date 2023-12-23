@@ -17,8 +17,9 @@ public class InMemoryAccessTokenStore implements AccessTokenStore {
     @Override
     @NotNull
     public Mono<Void> saveToken(@NotNull AccessToken accessToken) {
-        tokens.put(accessToken.getTokenValue(), accessToken);
-        return Mono.empty();
+        return Mono.fromRunnable(() ->
+                tokens.put(accessToken.getTokenValue(), accessToken)
+        );
     }
 
     @Override

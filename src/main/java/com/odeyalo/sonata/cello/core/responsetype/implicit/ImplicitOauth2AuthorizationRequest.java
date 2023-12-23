@@ -1,5 +1,8 @@
-package com.odeyalo.sonata.cello.core;
+package com.odeyalo.sonata.cello.core.responsetype.implicit;
 
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.RedirectUri;
+import com.odeyalo.sonata.cello.core.ScopeContainer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;

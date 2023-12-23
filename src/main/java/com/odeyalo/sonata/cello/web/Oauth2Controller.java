@@ -2,7 +2,7 @@ package com.odeyalo.sonata.cello.web;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
-import com.odeyalo.sonata.cello.core.Oauth2ResponseTypeHandler;
+import com.odeyalo.sonata.cello.core.responsetype.Oauth2ResponseTypeHandler;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;

@@ -1,5 +1,7 @@
 package com.odeyalo.sonata.cello.core;
 
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequestConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

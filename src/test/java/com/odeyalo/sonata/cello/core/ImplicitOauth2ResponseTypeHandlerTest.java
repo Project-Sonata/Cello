@@ -1,6 +1,9 @@
 package com.odeyalo.sonata.cello.core;
 
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationResponse;
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2ResponseTypeHandler;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 

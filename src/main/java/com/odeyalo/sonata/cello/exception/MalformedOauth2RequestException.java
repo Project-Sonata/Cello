@@ -1,4 +1,4 @@
-package com.odeyalo.sonata.cello.core;
+package com.odeyalo.sonata.cello.exception;
 
 /**
  * Indicates that received request is malformed and cannot be processed by Oauth2 Server

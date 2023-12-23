@@ -1,5 +1,7 @@
 package com.odeyalo.sonata.cello.core;
 
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
+
 /**
  * Represent specific Oauth2 authorization request
  *

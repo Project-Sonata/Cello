@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.core;
 
+import com.odeyalo.sonata.cello.exception.MalformedOauth2RequestException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;

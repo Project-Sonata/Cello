@@ -1,11 +1,14 @@
-package com.odeyalo.sonata.cello.core;
+package com.odeyalo.sonata.cello.core.responsetype.implicit;
 
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponse;
+import com.odeyalo.sonata.cello.core.responsetype.Oauth2ResponseTypeHandler;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import static com.odeyalo.sonata.cello.core.ImplicitOauth2AuthorizationResponse.BEARER_TOKEN_TYPE;
+import static com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationResponse.BEARER_TOKEN_TYPE;
 
 
 /**

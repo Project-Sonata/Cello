@@ -1,5 +1,7 @@
-package com.odeyalo.sonata.cello.core;
+package com.odeyalo.sonata.cello.core.responsetype;
 
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponse;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;

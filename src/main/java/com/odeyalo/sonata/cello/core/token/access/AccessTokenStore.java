@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 /**
- * Used to store any {@link AccessToken} that should be accessed later.
+ * Used to store any {@link Oauth2AccessToken} that should be accessed later.
  */
 public interface AccessTokenStore {
     /**
@@ -13,15 +13,15 @@ public interface AccessTokenStore {
      * @return - {@link Mono} with {@link Void} on success or {@link Mono} with error
      */
     @NotNull
-    Mono<Void> saveToken(@NotNull AccessToken accessToken);
+    Mono<Void> saveToken(@NotNull Oauth2AccessToken accessToken);
 
     /**
      * Looking for token in store by its value
      * @param tokenValue - token value to use for searching
-     * @return - {@link Mono} with {@link AccessToken} if found or empty {@link Mono} if not found
+     * @return - {@link Mono} with {@link Oauth2AccessToken} if found or empty {@link Mono} if not found
      */
     @NotNull
-    Mono<AccessToken> findTokenByTokenValue(@NotNull String tokenValue);
+    Mono<Oauth2AccessToken> findTokenByTokenValue(@NotNull String tokenValue);
 
     /**
      * Indicates if token exists by this value or no

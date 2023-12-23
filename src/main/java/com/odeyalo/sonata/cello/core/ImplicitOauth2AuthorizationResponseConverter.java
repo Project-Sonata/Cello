@@ -14,17 +14,17 @@ public class ImplicitOauth2AuthorizationResponseConverter implements Oauth2Autho
 
     @Override
     @NotNull
-    public Mono<ServerHttpResponse> convert(@NotNull Oauth2AuthorizationExchange exchange,
+    public Mono<ServerHttpResponse> convert(@NotNull Oauth2AuthorizationResponse<? extends Oauth2AuthorizationRequest> response,
                                             @NotNull ServerWebExchange currentExchange) {
 
-        if ( !(exchange.response() instanceof ImplicitOauth2AuthorizationResponse implicitOauth2AuthorizationResponse) ) {
+        if ( !(response instanceof ImplicitOauth2AuthorizationResponse implicitOauth2AuthorizationResponse) ) {
             return Mono.empty();
         }
+
         ServerHttpResponse serverHttpResponse = currentExchange.getResponse();
+        ImplicitOauth2AuthorizationRequest authorizationRequest = implicitOauth2AuthorizationResponse.getAssociatedRequest();
 
-        AuthorizationRequest authorizationRequest = exchange.request();
-
-        String redirectUri = new StringBuilder(authorizationRequest.getRedirectUri())
+        String redirectUri = new StringBuilder(authorizationRequest.getRedirectUri().uriString()) // todo
                 .append("?access_token=")
                 .append(implicitOauth2AuthorizationResponse.getAccessToken())
                 .append("&token_type=")

@@ -1,9 +1,9 @@
 package com.odeyalo.sonata.cello.exception;
 
-import com.odeyalo.sonata.cello.core.AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 
 /**
- * Exception to throw when {@link AuthorizationRequest} cannot be created
+ * Exception to throw when {@link Oauth2AuthorizationRequest} cannot be created
  */
 public class AuthorizationRequestCreationException extends RuntimeException {
     

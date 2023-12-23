@@ -1,6 +1,6 @@
 package com.odeyalo.sonata.cello.web;
 
-import com.odeyalo.sonata.cello.core.Oauth2RequestParameters;
+import com.odeyalo.sonata.cello.core.DefaultOauth2ResponseTypes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.util.UriUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -119,7 +118,7 @@ public class ImplicitAuthorizeEndpointTest {
                 .uri(builder ->
                         builder
                                 .path("/authorize")
-                                .queryParam(RESPONSE_TYPE, "implicit")
+                                .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.IMPLICIT.getName())
                                 .queryParam(CLIENT_ID, "123")
                                 .queryParam(REDIRECT_URI, "http://localhost:4000")
                                 .queryParam(SCOPE, "read write")

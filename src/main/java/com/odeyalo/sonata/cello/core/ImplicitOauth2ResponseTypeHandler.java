@@ -16,20 +16,26 @@ public class ImplicitOauth2ResponseTypeHandler implements Oauth2ResponseTypeHand
 
     @Override
     @NotNull
-    public Mono<Boolean> supports(@NotNull AuthorizationRequest authorizationRequest) {
-        return Mono.just(true);
+    public Mono<Boolean> supports(@NotNull Oauth2AuthorizationRequest authorizationRequest) {
+        return Mono.just(
+                authorizationRequest instanceof ImplicitOauth2AuthorizationRequest
+        );
     }
 
     @Override
     @NotNull
-    public Mono<Oauth2AuthorizationResponse> permissionGranted(@NotNull AuthorizationRequest authorizationRequest,
-                                                               @NotNull ResourceOwner resourceOwner) {
+    public Mono<Oauth2AuthorizationResponse<? extends Oauth2AuthorizationRequest>> permissionGranted(@NotNull Oauth2AuthorizationRequest authorizationRequest,
+                                                                                                     @NotNull ResourceOwner resourceOwner) {
 
-        return Mono.just(ImplicitOauth2AuthorizationResponse.builder()
-                .accessToken("hello")
-                .tokenType(BEARER_TOKEN_TYPE)
-                .expiresIn(3600L)
-                .state(authorizationRequest.getState())
-                .build());
+        ImplicitOauth2AuthorizationRequest implicitOauth2AuthorizationRequest = (ImplicitOauth2AuthorizationRequest) authorizationRequest;
+
+        return Mono.just(
+                ImplicitOauth2AuthorizationResponse.withAssociatedRequest(implicitOauth2AuthorizationRequest)
+                        .accessToken("hello")
+                        .tokenType(BEARER_TOKEN_TYPE)
+                        .expiresIn(3600L)
+                        .state(implicitOauth2AuthorizationRequest.getState())
+                        .build()
+        );
     }
 }

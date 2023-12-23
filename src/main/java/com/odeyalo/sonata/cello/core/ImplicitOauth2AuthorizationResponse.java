@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 @Value
 @Builder
 @AllArgsConstructor(staticName = "of")
-public class ImplicitOauth2AuthorizationResponse implements Oauth2AuthorizationResponse {
+public class ImplicitOauth2AuthorizationResponse implements Oauth2AuthorizationResponse<ImplicitOauth2AuthorizationRequest> {
     /**
      * REQUIRED.  The access token issued by the authorization server.
      */
@@ -47,6 +47,26 @@ public class ImplicitOauth2AuthorizationResponse implements Oauth2AuthorizationR
      */
     @Nullable
     String state;
+    /**
+     * Request associated with this response
+     */
+    @NotNull
+    ImplicitOauth2AuthorizationRequest associatedRequest;
 
     public static final String BEARER_TOKEN_TYPE = "Bearer";
+
+    @Override
+    @NotNull
+    public ImplicitOauth2AuthorizationRequest getAssociatedRequest() {
+        return associatedRequest;
+    }
+
+    public static ImplicitOauth2AuthorizationResponse.ImplicitOauth2AuthorizationResponseBuilder withAssociatedRequest(ImplicitOauth2AuthorizationRequest request) {
+        return builder().associatedRequest(request);
+    }
+
+    private static ImplicitOauth2AuthorizationResponse.ImplicitOauth2AuthorizationResponseBuilder builder() {
+        return new ImplicitOauth2AuthorizationResponseBuilder();
+    }
+
 }

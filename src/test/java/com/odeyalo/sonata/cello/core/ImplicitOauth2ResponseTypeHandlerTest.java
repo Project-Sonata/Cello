@@ -6,15 +6,13 @@ import reactor.test.StepVerifier;
 
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class ImplicitOauth2ResponseTypeHandlerTest {
 
     @Test
     void shouldReturnAuthorizationResponseOfSpecificTypeOnSuccess() {
         ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
 
-        AuthorizationRequest authorizationRequest = createValidAuthorizationRequest();
+        var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
@@ -26,7 +24,7 @@ class ImplicitOauth2ResponseTypeHandlerTest {
     void shouldReturnResponseWithAccessToken() {
         ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
 
-        AuthorizationRequest authorizationRequest = createValidAuthorizationRequest();
+        var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
@@ -41,7 +39,7 @@ class ImplicitOauth2ResponseTypeHandlerTest {
     void shouldReturnResponseWithAccessTokenType() {
         ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
 
-        AuthorizationRequest authorizationRequest = createValidAuthorizationRequest();
+        var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
@@ -56,7 +54,7 @@ class ImplicitOauth2ResponseTypeHandlerTest {
     void shouldReturnResponseWithAccessTokenLifetime() {
         ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
 
-        AuthorizationRequest authorizationRequest = createValidAuthorizationRequest();
+        var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
@@ -71,7 +69,7 @@ class ImplicitOauth2ResponseTypeHandlerTest {
     void shouldReturnResponseWithStateEqualToProvided() {
         ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
 
-        AuthorizationRequest authorizationRequest = createValidAuthorizationRequest();
+        var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
@@ -82,12 +80,11 @@ class ImplicitOauth2ResponseTypeHandlerTest {
                 .verifyComplete();
     }
 
-    private static AuthorizationRequest createValidAuthorizationRequest() {
-        return AuthorizationRequest.builder()
+    private static ImplicitOauth2AuthorizationRequest createValidAuthorizationRequest() {
+        return ImplicitOauth2AuthorizationRequest.builder()
                 .clientId("sonata-123")
-                .redirectUri("https://localhost:8080")
+                .redirectUri(new RedirectUri("https://localhost:8080"))
                 .scopes(ScopeContainer.singleScope(SimpleScope.withName("write")))
-                .responseType("token")
                 .state("123")
                 .build();
     }

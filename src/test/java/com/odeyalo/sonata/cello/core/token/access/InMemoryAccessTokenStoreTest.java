@@ -12,7 +12,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldCompletedSuccessfullyOnSaved() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        AccessToken token = AccessToken.builder()
+        Oauth2AccessToken token = Oauth2AccessToken.builder()
                 .tokenValue("hello")
                 .issuedAt(Instant.now())
                 .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
@@ -27,7 +27,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldSaveTheToken() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        AccessToken token = AccessToken.builder()
+        Oauth2AccessToken token = Oauth2AccessToken.builder()
                 .tokenValue("hello")
                 .issuedAt(Instant.now())
                 .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
@@ -47,7 +47,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldReturnNothingIfNotExistByTokenValue() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        AccessToken token = AccessToken.builder()
+        Oauth2AccessToken token = Oauth2AccessToken.builder()
                 .tokenValue("hello")
                 .issuedAt(Instant.now())
                 .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
@@ -66,7 +66,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldReturnTrueIfTokenExistByValue() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        AccessToken token = AccessToken.builder()
+        Oauth2AccessToken token = Oauth2AccessToken.builder()
                 .tokenValue("hello")
                 .issuedAt(Instant.now())
                 .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
@@ -86,7 +86,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldReturnFalseIfNotExist() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        AccessToken token = AccessToken.builder()
+        Oauth2AccessToken token = Oauth2AccessToken.builder()
                 .tokenValue("hello")
                 .issuedAt(Instant.now())
                 .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))

@@ -8,15 +8,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Implementation of {@link AccessTokenStore} that store the {@link AccessToken} in {@link ConcurrentMap}
+ * Implementation of {@link AccessTokenStore} that store the {@link Oauth2AccessToken} in {@link ConcurrentMap}
  */
 @Component
 public class InMemoryAccessTokenStore implements AccessTokenStore {
-    public final ConcurrentMap<String, AccessToken> tokens = new ConcurrentHashMap<>();
+    public final ConcurrentMap<String, Oauth2AccessToken> tokens = new ConcurrentHashMap<>();
 
     @Override
     @NotNull
-    public Mono<Void> saveToken(@NotNull AccessToken accessToken) {
+    public Mono<Void> saveToken(@NotNull Oauth2AccessToken accessToken) {
         return Mono.fromRunnable(() ->
                 tokens.put(accessToken.getTokenValue(), accessToken)
         );
@@ -24,7 +24,7 @@ public class InMemoryAccessTokenStore implements AccessTokenStore {
 
     @Override
     @NotNull
-    public Mono<AccessToken> findTokenByTokenValue(@NotNull String tokenValue) {
+    public Mono<Oauth2AccessToken> findTokenByTokenValue(@NotNull String tokenValue) {
         return Mono.justOrEmpty(tokens.get(tokenValue));
     }
 

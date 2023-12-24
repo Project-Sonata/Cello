@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit;
 public class OpaquePersistentOauth2AccessTokenGenerator implements Oauth2AccessTokenGenerator {
     private final AccessTokenStore accessTokenStore;
     private final OpaqueOauth2AccessTokenValueGenerator tokenValueGenerator;
-    private static final int MINUTES_15 = 15;
+    private static final int ONE_HOUR = 1;
 
     @Autowired
     public OpaquePersistentOauth2AccessTokenGenerator(AccessTokenStore accessTokenStore,
@@ -42,7 +42,7 @@ public class OpaquePersistentOauth2AccessTokenGenerator implements Oauth2AccessT
                                                       @NotNull String tokenValue) {
 
         Instant issuedAt = Instant.now();
-        Instant expiresIn = issuedAt.plus(MINUTES_15, ChronoUnit.MINUTES);
+        Instant expiresIn = issuedAt.plus(ONE_HOUR, ChronoUnit.HOURS);
 
         return Oauth2AccessToken.builder()
                 .tokenValue(tokenValue)

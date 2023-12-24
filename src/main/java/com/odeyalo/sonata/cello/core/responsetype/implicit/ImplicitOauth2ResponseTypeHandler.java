@@ -4,7 +4,9 @@ import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponse;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.client.*;
+import com.odeyalo.sonata.cello.core.client.registration.Oauth2RegisteredClientService;
 import com.odeyalo.sonata.cello.core.responsetype.Oauth2ResponseTypeHandler;
+import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessToken;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerationContext;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerator;
 import org.jetbrains.annotations.NotNull;
@@ -19,9 +21,12 @@ import reactor.core.publisher.Mono;
 public class ImplicitOauth2ResponseTypeHandler implements Oauth2ResponseTypeHandler {
 
     private final Oauth2AccessTokenGenerator accessTokenGenerator;
+    private final Oauth2RegisteredClientService clientService;
 
-    public ImplicitOauth2ResponseTypeHandler(Oauth2AccessTokenGenerator accessTokenGenerator) {
+    public ImplicitOauth2ResponseTypeHandler(Oauth2AccessTokenGenerator accessTokenGenerator,
+                                             Oauth2RegisteredClientService clientService) {
         this.accessTokenGenerator = accessTokenGenerator;
+        this.clientService = clientService;
     }
 
     @Override
@@ -39,27 +44,31 @@ public class ImplicitOauth2ResponseTypeHandler implements Oauth2ResponseTypeHand
 
         ImplicitOauth2AuthorizationRequest implicitRequest = (ImplicitOauth2AuthorizationRequest) authorizationRequest;
 
-        Oauth2AccessTokenGenerationContext context = Oauth2AccessTokenGenerationContext.builder()
+        return clientService.findByClientId(implicitRequest.getClientId())
+                .map(client -> createTokenContext(resourceOwner, implicitRequest, client))
+                .flatMap(accessTokenGenerator::generateToken)
+                .map(
+                        token -> buildImplicitOauth2AuthorizationResponse(implicitRequest, token)
+                );
+    }
+
+    private static ImplicitOauth2AuthorizationResponse buildImplicitOauth2AuthorizationResponse(ImplicitOauth2AuthorizationRequest implicitRequest, Oauth2AccessToken token) {
+        return ImplicitOauth2AuthorizationResponse.withAssociatedRequest(implicitRequest)
+                .accessToken(token.getTokenValue())
+                .tokenType(token.getTokenType().typeName())
+                .scope(token.getScopes())
+                .state(implicitRequest.getState())
+                .expiresIn(token.remainingLifetime().getSeconds())
+                .build();
+    }
+
+    private static Oauth2AccessTokenGenerationContext createTokenContext(@NotNull ResourceOwner resourceOwner,
+                                                                         @NotNull ImplicitOauth2AuthorizationRequest implicitRequest,
+                                                                         @NotNull Oauth2RegisteredClient client) {
+        return Oauth2AccessTokenGenerationContext.builder()
                 .scopes(implicitRequest.getScopes())
-                .client(
-                        Oauth2RegisteredClient.builder()
-                                .clientProfile(ClientProfile.WEB_APPLICATION)
-                                .credentials(
-                                        Oauth2ClientCredentials.withId((implicitRequest.getClientId())))
-                                .oauth2ClientInfo(EmptyOauth2ClientInfo.create())
-                                .clientType(ClientType.PUBLIC)
-                                .build()) // TODO: Mocked now, should rewrite it
+                .client(client)
                 .resourceOwner(resourceOwner)
                 .build();
-
-        return accessTokenGenerator.generateToken(context)
-                .map(token -> ImplicitOauth2AuthorizationResponse.withAssociatedRequest(implicitRequest)
-                        .accessToken(token.getTokenValue())
-                        .tokenType(token.getTokenType().typeName())
-                        .scope(token.getScopes())
-                        .state(implicitRequest.getState())
-                        .expiresIn(token.remainingLifetime().getSeconds())
-                        .build()
-        );
     }
 }

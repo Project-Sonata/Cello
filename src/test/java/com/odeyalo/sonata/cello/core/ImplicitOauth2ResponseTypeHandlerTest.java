@@ -4,6 +4,7 @@ import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationResponse;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2ResponseTypeHandler;
+import com.odeyalo.sonata.cello.core.token.access.*;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
@@ -13,8 +14,9 @@ class ImplicitOauth2ResponseTypeHandlerTest {
 
     @Test
     void shouldReturnAuthorizationResponseOfSpecificTypeOnSuccess() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value")
+        );
         var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
@@ -25,7 +27,9 @@ class ImplicitOauth2ResponseTypeHandlerTest {
 
     @Test
     void shouldReturnResponseWithAccessToken() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_access_token")
+        );
 
         var authorizationRequest = createValidAuthorizationRequest();
 
@@ -33,14 +37,16 @@ class ImplicitOauth2ResponseTypeHandlerTest {
                 .as(StepVerifier::create)
                 .expectNextMatches(response -> {
                     var implicitResponse = (ImplicitOauth2AuthorizationResponse) response;
-                    return implicitResponse.getAccessToken() != null;
+                    return Objects.equals(implicitResponse.getAccessToken(), "my_access_token");
                 })
                 .verifyComplete();
     }
 
     @Test
     void shouldReturnResponseWithAccessTokenType() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value")
+        );
 
         var authorizationRequest = createValidAuthorizationRequest();
 
@@ -48,15 +54,16 @@ class ImplicitOauth2ResponseTypeHandlerTest {
                 .as(StepVerifier::create)
                 .expectNextMatches(response -> {
                     var implicitResponse = (ImplicitOauth2AuthorizationResponse) response;
-                    return implicitResponse.getTokenType() != null;
+                    return Objects.equals(implicitResponse.getTokenType(), Oauth2AccessToken.TokenType.BEARER.typeName());
                 })
                 .verifyComplete();
     }
 
     @Test
     void shouldReturnResponseWithAccessTokenLifetime() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value")
+        );
         var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
@@ -70,8 +77,9 @@ class ImplicitOauth2ResponseTypeHandlerTest {
 
     @Test
     void shouldReturnResponseWithStateEqualToProvided() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value")
+        );
         var authorizationRequest = createValidAuthorizationRequest();
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))

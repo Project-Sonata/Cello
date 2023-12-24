@@ -12,11 +12,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldCompletedSuccessfullyOnSaved() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        Oauth2AccessToken token = Oauth2AccessToken.builder()
-                .tokenValue("hello")
-                .issuedAt(Instant.now())
-                .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
-                .build();
+        Oauth2AccessToken token = createOauth2AccessToken();
 
         testable.saveToken(token)
                 .as(StepVerifier::create)
@@ -27,11 +23,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldSaveTheToken() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        Oauth2AccessToken token = Oauth2AccessToken.builder()
-                .tokenValue("hello")
-                .issuedAt(Instant.now())
-                .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
-                .build();
+        Oauth2AccessToken token = createOauth2AccessToken();
 
         testable.saveToken(token)
                 .as(StepVerifier::create)
@@ -47,11 +39,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldReturnNothingIfNotExistByTokenValue() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        Oauth2AccessToken token = Oauth2AccessToken.builder()
-                .tokenValue("hello")
-                .issuedAt(Instant.now())
-                .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
-                .build();
+        Oauth2AccessToken token = createOauth2AccessToken();
 
         testable.saveToken(token)
                 .as(StepVerifier::create)
@@ -66,11 +54,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldReturnTrueIfTokenExistByValue() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        Oauth2AccessToken token = Oauth2AccessToken.builder()
-                .tokenValue("hello")
-                .issuedAt(Instant.now())
-                .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
-                .build();
+        Oauth2AccessToken token = createOauth2AccessToken();
 
         testable.saveToken(token)
                 .as(StepVerifier::create)
@@ -86,11 +70,7 @@ class InMemoryAccessTokenStoreTest {
     void shouldReturnFalseIfNotExist() {
         InMemoryAccessTokenStore testable = new InMemoryAccessTokenStore();
 
-        Oauth2AccessToken token = Oauth2AccessToken.builder()
-                .tokenValue("hello")
-                .issuedAt(Instant.now())
-                .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
-                .build();
+        Oauth2AccessToken token = createOauth2AccessToken();
 
         testable.saveToken(token)
                 .as(StepVerifier::create)
@@ -101,4 +81,13 @@ class InMemoryAccessTokenStoreTest {
                 .expectNext(Boolean.FALSE)
                 .verifyComplete();
     }
+
+    private static Oauth2AccessToken createOauth2AccessToken() {
+        return Oauth2AccessToken.builder()
+                .tokenValue("hello")
+                .issuedAt(Instant.now())
+                .expiresIn(Instant.now().plus(5, ChronoUnit.MINUTES))
+                .build();
+    }
+
 }

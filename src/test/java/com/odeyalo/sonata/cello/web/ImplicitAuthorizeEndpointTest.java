@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,8 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
+@RegisterOauth2Clients
 public class ImplicitAuthorizeEndpointTest {
     public static final String STATE_PARAMETER_VALUE = "opaque";
+    public static final String EXISTING_CLIENT_ID = "123";
     @Autowired
     WebTestClient webTestClient;
 
@@ -119,7 +122,7 @@ public class ImplicitAuthorizeEndpointTest {
                         builder
                                 .path("/authorize")
                                 .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.IMPLICIT.getName())
-                                .queryParam(CLIENT_ID, "123")
+                                .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
                                 .queryParam(REDIRECT_URI, "http://localhost:4000")
                                 .queryParam(SCOPE, "read write")
                                 .queryParam(STATE, "opaque")

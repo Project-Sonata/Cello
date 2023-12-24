@@ -1,9 +1,13 @@
 package com.odeyalo.sonata.cello.core;
 
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
+import com.odeyalo.sonata.cello.core.client.*;
+import com.odeyalo.sonata.cello.core.client.registration.InMemoryOauth2RegisteredClientService;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationResponse;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2ResponseTypeHandler;
+import com.odeyalo.sonata.cello.core.token.access.MockOauth2AccessTokenGenerator;
+import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessToken;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
@@ -13,9 +17,20 @@ class ImplicitOauth2ResponseTypeHandlerTest {
 
     @Test
     void shouldReturnAuthorizationResponseOfSpecificTypeOnSuccess() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
         var authorizationRequest = createValidAuthorizationRequest();
+
+        Oauth2RegisteredClient client = Oauth2RegisteredClient.builder().clientType(ClientType.PUBLIC)
+                .clientProfile(ClientProfile.WEB_APPLICATION)
+                .credentials(Oauth2ClientCredentials.withId(authorizationRequest.getClientId()))
+                .oauth2ClientInfo(EmptyOauth2ClientInfo.create())
+                .build();
+
+        InMemoryOauth2RegisteredClientService clientService = new InMemoryOauth2RegisteredClientService(client);
+
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value"),
+                clientService
+        );
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
@@ -25,39 +40,72 @@ class ImplicitOauth2ResponseTypeHandlerTest {
 
     @Test
     void shouldReturnResponseWithAccessToken() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
         var authorizationRequest = createValidAuthorizationRequest();
+
+        Oauth2RegisteredClient client = Oauth2RegisteredClient.builder().clientType(ClientType.PUBLIC)
+                .clientProfile(ClientProfile.WEB_APPLICATION)
+                .credentials(Oauth2ClientCredentials.withId(authorizationRequest.getClientId()))
+                .oauth2ClientInfo(EmptyOauth2ClientInfo.create())
+                .build();
+
+        InMemoryOauth2RegisteredClientService clientService = new InMemoryOauth2RegisteredClientService(client);
+
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_access_token"),
+                clientService
+        );
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
                 .expectNextMatches(response -> {
                     var implicitResponse = (ImplicitOauth2AuthorizationResponse) response;
-                    return implicitResponse.getAccessToken() != null;
+                    return Objects.equals(implicitResponse.getAccessToken(), "my_access_token");
                 })
                 .verifyComplete();
     }
 
     @Test
     void shouldReturnResponseWithAccessTokenType() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
         var authorizationRequest = createValidAuthorizationRequest();
+
+        Oauth2RegisteredClient client = Oauth2RegisteredClient.builder().clientType(ClientType.PUBLIC)
+                .clientProfile(ClientProfile.WEB_APPLICATION)
+                .credentials(Oauth2ClientCredentials.withId(authorizationRequest.getClientId()))
+                .oauth2ClientInfo(EmptyOauth2ClientInfo.create())
+                .build();
+
+        InMemoryOauth2RegisteredClientService clientService = new InMemoryOauth2RegisteredClientService(client);
+
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value"),
+                clientService
+        );
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
                 .expectNextMatches(response -> {
                     var implicitResponse = (ImplicitOauth2AuthorizationResponse) response;
-                    return implicitResponse.getTokenType() != null;
+                    return Objects.equals(implicitResponse.getTokenType(), Oauth2AccessToken.TokenType.BEARER.typeName());
                 })
                 .verifyComplete();
     }
 
     @Test
     void shouldReturnResponseWithAccessTokenLifetime() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
         var authorizationRequest = createValidAuthorizationRequest();
+
+        Oauth2RegisteredClient client = Oauth2RegisteredClient.builder().clientType(ClientType.PUBLIC)
+                .clientProfile(ClientProfile.WEB_APPLICATION)
+                .credentials(Oauth2ClientCredentials.withId(authorizationRequest.getClientId()))
+                .oauth2ClientInfo(EmptyOauth2ClientInfo.create())
+                .build();
+
+        InMemoryOauth2RegisteredClientService clientService = new InMemoryOauth2RegisteredClientService(client);
+
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value"),
+                clientService
+        );
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)
@@ -70,9 +118,20 @@ class ImplicitOauth2ResponseTypeHandlerTest {
 
     @Test
     void shouldReturnResponseWithStateEqualToProvided() {
-        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler();
-
         var authorizationRequest = createValidAuthorizationRequest();
+
+        Oauth2RegisteredClient client = Oauth2RegisteredClient.builder().clientType(ClientType.PUBLIC)
+                .clientProfile(ClientProfile.WEB_APPLICATION)
+                .credentials(Oauth2ClientCredentials.withId(authorizationRequest.getClientId()))
+                .oauth2ClientInfo(EmptyOauth2ClientInfo.create())
+                .build();
+
+        InMemoryOauth2RegisteredClientService clientService = new InMemoryOauth2RegisteredClientService(client);
+
+        ImplicitOauth2ResponseTypeHandler testable = new ImplicitOauth2ResponseTypeHandler(
+                new MockOauth2AccessTokenGenerator("my_token_value"),
+                clientService
+        );
 
         testable.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
                 .as(StepVerifier::create)

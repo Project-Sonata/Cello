@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import testing.spring.configuration.RegisterOauth2Clients;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 
@@ -17,8 +18,10 @@ import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 @TestInstance(Lifecycle.PER_CLASS)
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
+@RegisterOauth2Clients
 class AuthorizeEndpointTest {
 
+    public static final String EXISTING_CLIENT_ID = "123";
     @Autowired
     WebTestClient webTestClient;
 
@@ -42,7 +45,7 @@ class AuthorizeEndpointTest {
                     .uri(builder ->
                             builder
                                     .path("/authorize")
-                                    .queryParam(CLIENT_ID, "123")
+                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
                                     .queryParam(REDIRECT_URI, "http://localhost:4000")
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
@@ -77,7 +80,7 @@ class AuthorizeEndpointTest {
                             builder
                                     .path("/authorize")
                                     .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(CLIENT_ID, "123")
+                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
                                     .queryParam(REDIRECT_URI, "http://localhost:4000")
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")

@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.core.client;
 
+import com.odeyalo.sonata.cello.core.RedirectUris;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -21,4 +22,7 @@ public class Oauth2RegisteredClient {
     ClientProfile clientProfile;
     @NotNull
     ClientType clientType;
+    @NotNull
+    @Builder.Default
+    RedirectUris allowedRedirectUris = RedirectUris.empty();
 }

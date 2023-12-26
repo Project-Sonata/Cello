@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ImplicitAuthorizeEndpointTest {
     public static final String STATE_PARAMETER_VALUE = "opaque";
     public static final String EXISTING_CLIENT_ID = "123";
+    public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
     @Autowired
     WebTestClient webTestClient;
 
@@ -123,7 +124,7 @@ public class ImplicitAuthorizeEndpointTest {
                                 .path("/authorize")
                                 .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.IMPLICIT.getName())
                                 .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
                                 .queryParam(SCOPE, "read write")
                                 .queryParam(STATE, "opaque")
                                 .build())

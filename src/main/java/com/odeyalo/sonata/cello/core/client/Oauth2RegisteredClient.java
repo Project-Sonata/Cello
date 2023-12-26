@@ -3,6 +3,7 @@ package com.odeyalo.sonata.cello.core.client;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * POJO about client that has been registered in Cello.
@@ -11,8 +12,13 @@ import lombok.Value;
 @AllArgsConstructor(staticName = "of")
 @Builder
 public class Oauth2RegisteredClient {
+    @NotNull
     Oauth2ClientCredentials credentials;
-    Oauth2ClientInfo oauth2ClientInfo;
+    @NotNull
+    @Builder.Default
+    Oauth2ClientInfo oauth2ClientInfo = EmptyOauth2ClientInfo.create();
+    @NotNull
     ClientProfile clientProfile;
+    @NotNull
     ClientType clientType;
 }

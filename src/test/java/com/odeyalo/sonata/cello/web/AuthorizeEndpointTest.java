@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.web;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -22,6 +23,7 @@ import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 class AuthorizeEndpointTest {
 
     public static final String EXISTING_CLIENT_ID = "123";
+
     @Autowired
     WebTestClient webTestClient;
 
@@ -62,6 +64,43 @@ class AuthorizeEndpointTest {
                     .uri(builder ->
                             builder
                                     .path("/authorize")
+                                    .queryParam(RESPONSE_TYPE, "token")
+                                    .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                    .queryParam(SCOPE, "read write")
+                                    .queryParam(STATE, "opaque")
+                                    .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
+                    .exchange();
+
+            exchange.expectStatus().isBadRequest();
+        }
+
+        @Test
+        void shouldReturn400BadRequestIfClientIdIsNotExist() {
+            WebTestClient.ResponseSpec exchange = webTestClient.get()
+                    .uri(builder ->
+                            builder
+                                    .path("/authorize")
+                                    .queryParam(CLIENT_ID, "not_exist")
+                                    .queryParam(RESPONSE_TYPE, "token")
+                                    .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                    .queryParam(SCOPE, "read write")
+                                    .queryParam(STATE, "opaque")
+                                    .build())
+                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
+                    .exchange();
+
+            exchange.expectStatus().isBadRequest();
+        }
+
+        @Test
+        @Disabled("Not supported now")
+        void shouldReturn400BadRequestIfRedirectUriIsNotRegistered() {
+            WebTestClient.ResponseSpec exchange = webTestClient.get()
+                    .uri(builder ->
+                            builder
+                                    .path("/authorize")
+                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
                                     .queryParam(RESPONSE_TYPE, "token")
                                     .queryParam(REDIRECT_URI, "http://localhost:4000")
                                     .queryParam(SCOPE, "read write")

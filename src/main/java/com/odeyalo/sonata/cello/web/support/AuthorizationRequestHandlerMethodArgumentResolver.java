@@ -3,6 +3,7 @@ package com.odeyalo.sonata.cello.web.support;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestConverter;
 import com.odeyalo.sonata.cello.core.Oauth2RequestParameters;
+import com.odeyalo.sonata.cello.core.validation.ProviderOauth2AuthorizationRequestValidator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
@@ -19,10 +20,12 @@ import reactor.core.publisher.Mono;
 @Component
 public class AuthorizationRequestHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
     private final Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter;
+    private final ProviderOauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator;
 
     @Autowired
-    public AuthorizationRequestHandlerMethodArgumentResolver(Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter) {
+    public AuthorizationRequestHandlerMethodArgumentResolver(Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter, ProviderOauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator) {
         this.oauth2AuthorizationRequestConverter = oauth2AuthorizationRequestConverter;
+        this.oauth2AuthorizationRequestValidator = oauth2AuthorizationRequestValidator;
     }
 
     @Override
@@ -40,8 +43,9 @@ public class AuthorizationRequestHandlerMethodArgumentResolver implements Handle
                 .onErrorResume(ex -> missingRequestParameterException(ex.getMessage(), parameter))
                 // If we cannot process the request, then, probably, response_type is missing or not supported, return it as response
                 .switchIfEmpty(missingRequestParameterException(Oauth2RequestParameters.RESPONSE_TYPE, parameter))
-                // Required due to Java casting
-                .map(request -> request);
+                .flatMap(request -> oauth2AuthorizationRequestValidator.validate(request)
+                                .thenReturn(request)
+                );
     }
 
     @NotNull

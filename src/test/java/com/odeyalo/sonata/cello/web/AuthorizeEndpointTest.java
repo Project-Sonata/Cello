@@ -1,7 +1,6 @@
 package com.odeyalo.sonata.cello.web;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -23,6 +22,7 @@ import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 class AuthorizeEndpointTest {
 
     public static final String EXISTING_CLIENT_ID = "123";
+    public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
 
     @Autowired
     WebTestClient webTestClient;
@@ -48,7 +48,7 @@ class AuthorizeEndpointTest {
                             builder
                                     .path("/authorize")
                                     .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                    .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
@@ -65,7 +65,7 @@ class AuthorizeEndpointTest {
                             builder
                                     .path("/authorize")
                                     .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
@@ -83,7 +83,7 @@ class AuthorizeEndpointTest {
                                     .path("/authorize")
                                     .queryParam(CLIENT_ID, "not_exist")
                                     .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
@@ -94,7 +94,6 @@ class AuthorizeEndpointTest {
         }
 
         @Test
-        @Disabled("Not supported now")
         void shouldReturn400BadRequestIfRedirectUriIsNotRegistered() {
             WebTestClient.ResponseSpec exchange = webTestClient.get()
                     .uri(builder ->
@@ -102,7 +101,7 @@ class AuthorizeEndpointTest {
                                     .path("/authorize")
                                     .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
                                     .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                    .queryParam(REDIRECT_URI, "http:localhost:9812/redirect/not/allowed")
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
@@ -120,7 +119,7 @@ class AuthorizeEndpointTest {
                                     .path("/authorize")
                                     .queryParam(RESPONSE_TYPE, "token")
                                     .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                    .queryParam(REDIRECT_URI, "http://localhost:4000")
+                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())

@@ -1,5 +1,7 @@
 package testing.spring.configuration;
 
+import com.odeyalo.sonata.cello.core.RedirectUri;
+import com.odeyalo.sonata.cello.core.RedirectUris;
 import com.odeyalo.sonata.cello.core.client.*;
 import com.odeyalo.sonata.cello.core.client.registration.InMemoryOauth2RegisteredClientService;
 import org.springframework.context.annotation.Bean;
@@ -14,11 +16,11 @@ public class RegisteredClientRegistratorAutoConfiguration {
                 .clientProfile(ClientProfile.WEB_APPLICATION)
                 .credentials(Oauth2ClientCredentials.withId("123"))
                 .oauth2ClientInfo(EmptyOauth2ClientInfo.create())
-                .build();
+                .allowedRedirectUris(
+                        RedirectUris.single(RedirectUri.create("http://localhost:4000"))
+                ).build();
 
-        return new InMemoryOauth2RegisteredClientService(
-            client
-        );
+        return new InMemoryOauth2RegisteredClientService(client);
     }
 
 }

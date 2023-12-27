@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.core.authentication.resourceowner;
 
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.exception.ResourceOwnerAuthenticationException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;

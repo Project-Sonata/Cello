@@ -3,11 +3,10 @@ package com.odeyalo.sonata.cello.web.support;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestConverter;
 import com.odeyalo.sonata.cello.core.Oauth2RequestParameters;
-import com.odeyalo.sonata.cello.core.validation.ProviderOauth2AuthorizationRequestValidator;
+import com.odeyalo.sonata.cello.core.validation.Oauth2AuthorizationRequestValidator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.MissingRequestValueException;
@@ -17,13 +16,12 @@ import reactor.core.publisher.Mono;
 /**
  * Resolve the {@link Oauth2AuthorizationRequest} from {@link ServerWebExchange}
  */
-@Component
 public class AuthorizationRequestHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
     private final Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter;
-    private final ProviderOauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator;
+    private final Oauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator;
 
-    @Autowired
-    public AuthorizationRequestHandlerMethodArgumentResolver(Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter, ProviderOauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator) {
+    public AuthorizationRequestHandlerMethodArgumentResolver(Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter,
+                                                             Oauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator) {
         this.oauth2AuthorizationRequestConverter = oauth2AuthorizationRequestConverter;
         this.oauth2AuthorizationRequestValidator = oauth2AuthorizationRequestValidator;
     }

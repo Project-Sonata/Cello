@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 /**
  * Handle validation of {@link ImplicitOauth2AuthorizationRequest} only.
  */
-@Component
 public class ImplicitOauth2AuthorizationRequestValidationProvider implements Oauth2AuthorizationRequestValidationProvider {
     private final Oauth2RegisteredClientService clientService;
 

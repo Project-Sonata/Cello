@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.core.authentication;
 
+import com.odeyalo.sonata.cello.core.authentication.support.StaticLoginPageProperties;
 import com.odeyalo.sonata.cello.support.io.ReactiveFileReader;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
@@ -11,9 +12,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class StaticHtmlLoginPageRendererAuthenticationPageProvider implements AuthenticationPageProvider {
     private final ReactiveFileReader reactiveFileReader;
+    private final StaticLoginPageProperties pageProperties;
 
-    public StaticHtmlLoginPageRendererAuthenticationPageProvider(ReactiveFileReader reactiveFileReader) {
+    public StaticHtmlLoginPageRendererAuthenticationPageProvider(ReactiveFileReader reactiveFileReader, StaticLoginPageProperties pageProperties) {
         this.reactiveFileReader = reactiveFileReader;
+        this.pageProperties = pageProperties;
     }
 
     @Override
@@ -22,7 +25,7 @@ public class StaticHtmlLoginPageRendererAuthenticationPageProvider implements Au
         ServerHttpResponse response = exchange.getResponse();
         response.getHeaders().setContentType(MediaType.TEXT_HTML);
 
-        return response.writeWith(Mono.from(reactiveFileReader.readAllBytes("C:\\Users\\thepr\\IdeaProjects\\Sonata\\Cello\\src\\main\\resources\\public\\login.html"))
+        return response.writeWith(Mono.from(reactiveFileReader.readAllBytes(pageProperties.getPath()))
                         .map(byteBuffer -> response.bufferFactory().wrap(byteBuffer)))
                 .thenReturn(response);
     }

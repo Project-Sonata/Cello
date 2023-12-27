@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Implementation of {@link AccessTokenStore} that store the {@link Oauth2AccessToken} in {@link ConcurrentMap}
  */
-@Component
 public class InMemoryAccessTokenStore implements AccessTokenStore {
     public final ConcurrentMap<String, Oauth2AccessToken> tokens = new ConcurrentHashMap<>();
 

@@ -11,7 +11,6 @@ import java.util.List;
 /**
  * Invoke list of {@link Oauth2AuthorizationRequestValidationProvider} and returns first non-empty result
  */
-@Component
 public class ProviderOauth2AuthorizationRequestValidator implements Oauth2AuthorizationRequestValidator {
     private final List<Oauth2AuthorizationRequestValidationProvider> validationProviders;
 

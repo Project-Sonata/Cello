@@ -1,17 +1,14 @@
 package com.odeyalo.sonata.cello.core.authentication.resourceowner;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//@Component
 public class InMemoryResourceOwnerService implements ResourceOwnerService {
     private final Map<String, ResourceOwner> cache;
 

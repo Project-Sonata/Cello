@@ -52,29 +52,4 @@ public class SecurityConfiguration {
         entryPoint.setRequestCache(cache);
         return entryPoint;
     }
-
-    @Bean
-    public ServerRequestCache serverRequestCache() {
-        return new WebSessionServerRequestCache();
-    }
-
-    @Bean
-    public ReactiveUserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-                .username("user")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER", "ADMIN")
-                .build();
-        return new MapReactiveUserDetailsService(user, admin);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }

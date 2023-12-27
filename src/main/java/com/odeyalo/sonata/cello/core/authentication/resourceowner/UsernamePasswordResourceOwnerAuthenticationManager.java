@@ -1,16 +1,13 @@
 package com.odeyalo.sonata.cello.core.authentication.resourceowner;
 
-import com.odeyalo.sonata.cello.core.ScopeContainer;
-import com.odeyalo.sonata.cello.core.SimpleScope;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.exception.ResourceOwnerAuthenticationException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
-@Component
 public class UsernamePasswordResourceOwnerAuthenticationManager implements ResourceOwnerAuthenticationManager {
     private final ResourceOwnerService resourceOwnerService;
 
@@ -19,7 +16,8 @@ public class UsernamePasswordResourceOwnerAuthenticationManager implements Resou
     }
 
     @Override
-    public Mono<AuthenticatedResourceOwnerAuthentication> attemptAuthentication(ServerWebExchange webExchange) {
+    @NotNull
+    public Mono<AuthenticatedResourceOwnerAuthentication> attemptAuthentication(@NotNull ServerWebExchange webExchange) {
         MediaType requestContentType = webExchange.getRequest().getHeaders().getContentType();
 
         if ( !Objects.equals(requestContentType, MediaType.APPLICATION_FORM_URLENCODED) &&

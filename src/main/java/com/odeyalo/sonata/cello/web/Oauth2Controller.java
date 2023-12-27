@@ -25,16 +25,16 @@ public class Oauth2Controller {
     private final ResourceOwnerAuthenticator resourceOwnerAuthenticationManager;
     private final AuthenticationPageProvider authenticationPageProvider;
 
-    @Autowired
-    private Oauth2AuthorizationResponseConverter converter;
-    @Autowired
-    private Oauth2ResponseTypeHandler oauth2ResponseTypeHandler;
+    private final Oauth2AuthorizationResponseConverter converter;
+    private final Oauth2ResponseTypeHandler oauth2ResponseTypeHandler;
 
     public Oauth2Controller(ResourceOwnerAuthenticator resourceOwnerAuthenticationManager,
-                            AuthenticationPageProvider authenticationPageProvider) {
+                            AuthenticationPageProvider authenticationPageProvider, Oauth2AuthorizationResponseConverter converter, Oauth2ResponseTypeHandler oauth2ResponseTypeHandler) {
 
         this.resourceOwnerAuthenticationManager = resourceOwnerAuthenticationManager;
         this.authenticationPageProvider = authenticationPageProvider;
+        this.converter = converter;
+        this.oauth2ResponseTypeHandler = oauth2ResponseTypeHandler;
     }
 
     @GetMapping(value = "/authorize")

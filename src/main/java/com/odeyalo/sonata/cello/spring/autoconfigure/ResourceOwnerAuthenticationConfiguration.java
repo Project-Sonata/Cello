@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.spring.autoconfigure;
 
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
+import com.odeyalo.sonata.cello.core.authentication.DefaultAuthenticationPageProvider;
 import com.odeyalo.sonata.cello.core.authentication.StaticHtmlLoginPageRendererAuthenticationPageProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.*;
 import com.odeyalo.sonata.cello.core.authentication.support.StaticLoginPageProperties;
@@ -43,21 +44,7 @@ public class ResourceOwnerAuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuthenticationPageProvider authenticationPageProvider(ReactiveFileReader reactiveFileReader, StaticLoginPageProperties properties) {
-        return new StaticHtmlLoginPageRendererAuthenticationPageProvider(reactiveFileReader, properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public StaticLoginPageProperties properties() throws FileNotFoundException {
-        return StaticLoginPageProperties.builder()
-                .path(ResourceUtils.getFile("public/login.html").getPath())
-                .build();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ReactiveFileReader reactiveFileReader() {
-        return new RxIoReactiveFileReader();
+    public AuthenticationPageProvider authenticationPageProvider() {
+        return new DefaultAuthenticationPageProvider();
     }
 }

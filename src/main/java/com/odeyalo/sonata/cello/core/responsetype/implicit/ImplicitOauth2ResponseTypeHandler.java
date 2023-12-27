@@ -3,21 +3,19 @@ package com.odeyalo.sonata.cello.core.responsetype.implicit;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponse;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import com.odeyalo.sonata.cello.core.client.*;
+import com.odeyalo.sonata.cello.core.client.Oauth2RegisteredClient;
 import com.odeyalo.sonata.cello.core.client.registration.Oauth2RegisteredClientService;
 import com.odeyalo.sonata.cello.core.responsetype.Oauth2ResponseTypeHandler;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessToken;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerationContext;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerator;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 
 /**
  * Handle only implicit response type as defined in <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.2">Implicit Grant type</a>
  */
-@Component
 public class ImplicitOauth2ResponseTypeHandler implements Oauth2ResponseTypeHandler {
 
     private final Oauth2AccessTokenGenerator accessTokenGenerator;

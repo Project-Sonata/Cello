@@ -6,13 +6,11 @@ import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
 
-@Component
 public class ImplicitOauth2AuthorizationResponseConverter implements Oauth2AuthorizationResponseConverter {
 
     @Override

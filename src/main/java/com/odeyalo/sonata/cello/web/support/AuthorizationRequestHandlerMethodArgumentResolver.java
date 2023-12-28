@@ -2,8 +2,10 @@ package com.odeyalo.sonata.cello.web.support;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestConverter;
+import com.odeyalo.sonata.cello.core.Oauth2ErrorCode;
 import com.odeyalo.sonata.cello.core.Oauth2RequestParameters;
 import com.odeyalo.sonata.cello.core.validation.Oauth2AuthorizationRequestValidator;
+import com.odeyalo.sonata.cello.exception.Oauth2AuthorizationRequestValidationException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
@@ -38,16 +40,12 @@ public class AuthorizationRequestHandlerMethodArgumentResolver implements Handle
                                         @NotNull ServerWebExchange exchange) {
 
         return oauth2AuthorizationRequestConverter.convert(exchange)
-                .onErrorResume(ex -> missingRequestParameterException(ex.getMessage(), parameter))
-                // If we cannot process the request, then, probably, response_type is missing or not supported, return it as response
-                .switchIfEmpty(missingRequestParameterException(Oauth2RequestParameters.RESPONSE_TYPE, parameter))
+                .switchIfEmpty(
+                        Mono.error(
+                                Oauth2AuthorizationRequestValidationException.errorCodeOnly(Oauth2ErrorCode.INVALID_REQUEST)
+                        ))
                 .flatMap(request -> oauth2AuthorizationRequestValidator.validate(request)
-                                .thenReturn(request)
+                        .thenReturn(request)
                 );
-    }
-
-    @NotNull
-    private static <T> Mono<T> missingRequestParameterException(@NotNull String name, @NotNull MethodParameter parameter) {
-        return Mono.error(new MissingRequestValueException(name, Oauth2AuthorizationRequest.class, "Request parameter", parameter));
     }
 }

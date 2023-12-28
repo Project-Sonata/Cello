@@ -1,30 +1,36 @@
 package com.odeyalo.sonata.cello.exception;
 
-import com.odeyalo.sonata.cello.core.Oauth2ErrorCode;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.odeyalo.sonata.cello.exception.handler.ExceptionHandlingStrategy;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 /**
  * Handle exceptions occurred in Cello
  */
 @RestControllerAdvice
-public class ExceptionHandlerController {
+@Order(value = HIGHEST_PRECEDENCE)
+public class ExceptionHandlerController implements ErrorWebExceptionHandler {
+    private final List<ExceptionHandlingStrategy> exceptionHandlers;
 
-
-    @ExceptionHandler(Oauth2AuthorizationRequestValidationException.class)
-    public ResponseEntity<?> handleOauth2AuthorizationRequestValidationException(Oauth2AuthorizationRequestValidationException ex) {
-        if ( ex.getError() == Oauth2ErrorCode.INVALID_CLIENT ) {
-            return ResponseEntity.badRequest().body("The client is invalid!");
-        }
-        return ResponseEntity.badRequest().body("not  handled now. TODO");
+    public ExceptionHandlerController(List<ExceptionHandlingStrategy> exceptionHandlers) {
+        this.exceptionHandlers = exceptionHandlers;
     }
 
-
-    @ExceptionHandler(UnacceptableOauth2RedirectUriException.class)
-    public ResponseEntity<?> handleUnacceptableOauth2RedirectUriException(UnacceptableOauth2RedirectUriException ex) {
-        return ResponseEntity.badRequest().body("Redirect uri is not authorized, so we can't redirect you! :)");
+    @Override
+    public Mono<Void> handle(@NotNull ServerWebExchange exchange, @NotNull Throwable ex) {
+        return Flux.fromIterable(exceptionHandlers)
+                .filterWhen(strategy -> strategy.supports(ex))
+                .flatMap(strategy -> strategy.handle(exchange, ex))
+                .next();
     }
-
-
 }

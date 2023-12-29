@@ -2,7 +2,7 @@ package com.odeyalo.sonata.cello.spring.configuration;
 
 import com.odeyalo.sonata.cello.spring.auth.CelloOauth2AuthenticationConverter;
 import com.odeyalo.sonata.cello.spring.auth.CelloOauth2AuthenticationManager;
-import com.odeyalo.sonata.cello.web.AuthorizationRequestValidationFilter;
+import com.odeyalo.sonata.cello.web.AuthorizationRequestHandlerFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -15,10 +15,10 @@ import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 
 @Configuration
 public class SecurityConfiguration {
-    private final AuthorizationRequestValidationFilter authorizationRequestValidationFilter;
+    private final AuthorizationRequestHandlerFilter authorizationRequestValidationFilter;
 
-    public SecurityConfiguration(AuthorizationRequestValidationFilter authorizationRequestValidationFilter) {
-        this.authorizationRequestValidationFilter = authorizationRequestValidationFilter;
+    public SecurityConfiguration(AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter) {
+        this.authorizationRequestValidationFilter = authorizationRequestHandlerFilter;
     }
 
     @Bean

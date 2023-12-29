@@ -1,31 +1,22 @@
 package com.odeyalo.sonata.cello.web.support;
 
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestConverter;
-import com.odeyalo.sonata.cello.core.Oauth2ErrorCode;
-import com.odeyalo.sonata.cello.core.Oauth2RequestParameters;
-import com.odeyalo.sonata.cello.core.validation.Oauth2AuthorizationRequestValidator;
-import com.odeyalo.sonata.cello.exception.Oauth2AuthorizationRequestValidationException;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
-import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * Resolve the {@link Oauth2AuthorizationRequest} from {@link ServerWebExchange}
+ * Load the {@link Oauth2AuthorizationRequest} from {@link Oauth2AuthorizationRequestRepository}
  */
 public class AuthorizationRequestHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
-    private final Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter;
-    private final Oauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator;
+    private final Oauth2AuthorizationRequestRepository requestRepository;
 
-    public AuthorizationRequestHandlerMethodArgumentResolver(Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter,
-                                                             Oauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator) {
-        this.oauth2AuthorizationRequestConverter = oauth2AuthorizationRequestConverter;
-        this.oauth2AuthorizationRequestValidator = oauth2AuthorizationRequestValidator;
+    public AuthorizationRequestHandlerMethodArgumentResolver(Oauth2AuthorizationRequestRepository requestRepository) {
+        this.requestRepository = requestRepository;
     }
 
     @Override
@@ -39,13 +30,8 @@ public class AuthorizationRequestHandlerMethodArgumentResolver implements Handle
                                         @NotNull BindingContext bindingContext,
                                         @NotNull ServerWebExchange exchange) {
 
-        return oauth2AuthorizationRequestConverter.convert(exchange)
-                .switchIfEmpty(
-                        Mono.error(
-                                Oauth2AuthorizationRequestValidationException.errorCodeOnly(Oauth2ErrorCode.INVALID_REQUEST)
-                        ))
-                .flatMap(request -> oauth2AuthorizationRequestValidator.validate(request)
-                        .thenReturn(request)
-                );
+        return requestRepository.loadAuthorizationRequest(exchange)
+                // required due to java casting
+                .map(req -> req);
     }
 }

@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 /**
  * Responsible to save the {@link Oauth2AuthorizationRequest} to access it between different requests
  */
-public interface AuthorizationRequestRepository {
+public interface Oauth2AuthorizationRequestRepository {
 
     @NotNull
     Mono<Void> saveAuthorizationRequest(@NotNull Oauth2AuthorizationRequest request,

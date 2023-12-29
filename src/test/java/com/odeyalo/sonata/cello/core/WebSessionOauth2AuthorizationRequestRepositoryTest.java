@@ -5,11 +5,11 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import reactor.test.StepVerifier;
 
-class WebSessionAuthorizationRequestRepositoryTest {
+class WebSessionOauth2AuthorizationRequestRepositoryTest {
 
     @Test
     void shouldSaveRequest() {
-        WebSessionAuthorizationRequestRepository testable = new WebSessionAuthorizationRequestRepository();
+        WebSessionOauth2AuthorizationRequestRepository testable = new WebSessionOauth2AuthorizationRequestRepository();
         Oauth2AuthorizationRequest mockRequest = MockOauth2AuthorizationRequest.create();
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/hello").build());
 
@@ -25,7 +25,7 @@ class WebSessionAuthorizationRequestRepositoryTest {
 
     @Test
     void shouldReturnEmptyIfAuthorizationRequestWasNotSavedPreviously() {
-        WebSessionAuthorizationRequestRepository testable = new WebSessionAuthorizationRequestRepository();
+        WebSessionOauth2AuthorizationRequestRepository testable = new WebSessionOauth2AuthorizationRequestRepository();
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/hello").build());
 
         testable.loadAuthorizationRequest(exchange)
@@ -35,7 +35,7 @@ class WebSessionAuthorizationRequestRepositoryTest {
 
     @Test
     void shouldRemoveExistingAuthorizationRequest() {
-        WebSessionAuthorizationRequestRepository testable = new WebSessionAuthorizationRequestRepository();
+        WebSessionOauth2AuthorizationRequestRepository testable = new WebSessionOauth2AuthorizationRequestRepository();
         Oauth2AuthorizationRequest mockRequest = MockOauth2AuthorizationRequest.create();
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/hello").build());
 

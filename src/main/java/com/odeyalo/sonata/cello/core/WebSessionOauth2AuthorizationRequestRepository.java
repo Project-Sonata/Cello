@@ -1,17 +1,13 @@
 package com.odeyalo.sonata.cello.core;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * {@link AuthorizationRequestRepository} implementation that saves the {@link Oauth2AuthorizationRequest} in {@link org.springframework.web.server.WebSession}
+ * {@link Oauth2AuthorizationRequestRepository} implementation that saves the {@link Oauth2AuthorizationRequest} in {@link org.springframework.web.server.WebSession}
  */
-@Component
-@ConditionalOnMissingBean
-public class WebSessionAuthorizationRequestRepository implements AuthorizationRequestRepository {
+public class WebSessionOauth2AuthorizationRequestRepository implements Oauth2AuthorizationRequestRepository {
     private static final String AUTHORIZATION_REQUEST_KEY = "authorization_request";
 
     @Override

@@ -30,9 +30,22 @@ public class ResourceOwnerAuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceOwnerAuthenticator resourceOwnerAuthenticator(ServerRequestCache requestCache,
+    public ResourceOwnerAuthenticator resourceOwnerAuthenticator(ResourceOwnerAuthenticationSuccessHandler successHandler,
+                                                                 ResourceOwnerAuthenticationFailureHandler failureHandler,
                                                                  ResourceOwnerAuthenticationManager authenticationManager) {
-        return new RedirectingResourceOwnerAuthenticator(requestCache, authenticationManager);
+        return new HandlerResourceOwnerAuthenticator(authenticationManager, successHandler, failureHandler);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ResourceOwnerAuthenticationFailureHandler resourceOwnerAuthenticationFailureHandler() {
+        return new BadRequestStatusResourceOwnerAuthenticationFailureHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler(ServerRequestCache requestCache) {
+        return new RedirectingResourceOwnerAuthenticationSuccessHandler(requestCache);
     }
 
     @Bean

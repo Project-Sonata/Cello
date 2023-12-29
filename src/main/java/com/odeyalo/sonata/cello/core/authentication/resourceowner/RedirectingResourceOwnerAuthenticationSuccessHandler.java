@@ -2,6 +2,7 @@ package com.odeyalo.sonata.cello.core.authentication.resourceowner;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -27,6 +28,7 @@ public class RedirectingResourceOwnerAuthenticationSuccessHandler implements Res
         return serverRequestCache.getRedirectUri(exchange)
                 .defaultIfEmpty(DEFAULT_REDIRECT_URI)
                 .doOnNext(uri -> {
+                    exchange.getResponse().addCookie(ResponseCookie.from("clid", "odeyalo").build());
                     exchange.getResponse().setStatusCode(HttpStatus.FOUND);
                     exchange.getResponse().getHeaders().setLocation(uri);
                 }).then();

@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 
 @Configuration
 public class ResourceOwnerAuthenticationConfiguration {
     private final Logger logger = LoggerFactory.getLogger("Cello-Resource-Owner-Configuration");
+
 
     @Bean
     @ConditionalOnMissingBean
@@ -44,10 +44,10 @@ public class ResourceOwnerAuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler(ServerRequestCache requestCache) {
-        return new RedirectingResourceOwnerAuthenticationSuccessHandler(requestCache);
+    public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler() {
+        return new ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler();
     }
-
+  
     @Bean
     @ConditionalOnMissingBean
     public AuthenticationPageProvider authenticationPageProvider() {

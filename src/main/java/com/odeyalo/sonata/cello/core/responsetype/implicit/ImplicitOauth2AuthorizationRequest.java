@@ -2,6 +2,7 @@ package com.odeyalo.sonata.cello.core.responsetype.implicit;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.RedirectUri;
+import com.odeyalo.sonata.cello.core.RedirectUriProvider;
 import com.odeyalo.sonata.cello.core.ScopeContainer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 @Value
 @AllArgsConstructor(staticName = "of")
 @Builder
-public class ImplicitOauth2AuthorizationRequest implements Oauth2AuthorizationRequest {
+public class ImplicitOauth2AuthorizationRequest implements Oauth2AuthorizationRequest, RedirectUriProvider {
     /**
      * REQUIRED.  The client identifier as described in <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.2">Section 2.2.</a>
      */

@@ -21,6 +21,10 @@ public record RedirectUri(String uriString) {
         return new RedirectUri(uri);
     }
 
+    public URI asUri() {
+        return URI.create(uriString);
+    }
+
     private boolean isUriValid(String uri) {
         try {
             new URI(uri);

@@ -17,15 +17,19 @@ class RequestCacheRedirectingOauth2ConsentApprovedHandlerTest {
         CookieServerRequestCache cookieServerRequestCache = new CookieServerRequestCache();
         cookieServerRequestCache.setSaveRequestMatcher(ServerWebExchangeMatchers.anyExchange());
 
-        cookieServerRequestCache.saveRequest(MockServerWebExchange.from(
+        MockServerWebExchange initialExchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/hello")
-        )).block();
+        );
+
+        cookieServerRequestCache.saveRequest(initialExchange).block();
 
         RequestCacheRedirectingOauth2ConsentApprovedHandler testable = new RequestCacheRedirectingOauth2ConsentApprovedHandler(
                 cookieServerRequestCache
         );
         MockServerWebExchange webExchange = MockServerWebExchange.from(
-                MockServerHttpRequest.post("/oauth2/consent").build()
+                MockServerHttpRequest.post("/oauth2/consent")
+                        .cookie(initialExchange.getResponse().getCookies().getFirst("REDIRECT_URI"))
+                        .build()
         );
 
         testable.onConsentApproved(new MockAuthorizationRequest(), new ApprovedConsentDecision(), webExchange).block();
@@ -38,15 +42,20 @@ class RequestCacheRedirectingOauth2ConsentApprovedHandlerTest {
         CookieServerRequestCache cookieServerRequestCache = new CookieServerRequestCache();
         cookieServerRequestCache.setSaveRequestMatcher(ServerWebExchangeMatchers.anyExchange());
 
-        cookieServerRequestCache.saveRequest(MockServerWebExchange.from(
+        MockServerWebExchange initialExchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/hello")
-        )).block();
+        );
+
+        cookieServerRequestCache.saveRequest(initialExchange).block();
 
         RequestCacheRedirectingOauth2ConsentApprovedHandler testable = new RequestCacheRedirectingOauth2ConsentApprovedHandler(
                 cookieServerRequestCache
         );
+
         MockServerWebExchange webExchange = MockServerWebExchange.from(
-                MockServerHttpRequest.post("/oauth2/consent").build()
+                MockServerHttpRequest.post("/oauth2/consent")
+                        .cookie(initialExchange.getResponse().getCookies().getFirst("REDIRECT_URI"))
+                        .build()
         );
 
         testable.onConsentApproved(new MockAuthorizationRequest(), new ApprovedConsentDecision(), webExchange).block();

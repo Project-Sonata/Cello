@@ -47,7 +47,7 @@ public class ResourceOwnerAuthenticationConfiguration {
     public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler() {
         return new ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler();
     }
-
+  
     @Bean
     @ConditionalOnMissingBean
     public AuthenticationPageProvider authenticationPageProvider() {

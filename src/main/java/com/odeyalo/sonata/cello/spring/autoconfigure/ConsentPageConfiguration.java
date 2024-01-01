@@ -1,18 +1,20 @@
 package com.odeyalo.sonata.cello.spring.autoconfigure;
 
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
 import com.odeyalo.sonata.cello.core.consent.*;
+import com.odeyalo.sonata.cello.core.responsetype.Oauth2ResponseTypeHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 
 @Configuration
 public class ConsentPageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Oauth2ConsentApprovedHandler oauth2ConsentApprovedHandler(ServerRequestCache serverRequestCache) {
-        return new RequestCacheRedirectingOauth2ConsentApprovedHandler(serverRequestCache);
+    public Oauth2ConsentApprovedHandler oauth2ConsentApprovedHandler(Oauth2ResponseTypeHandler oauth2ResponseTypeHandler,
+                                                                     Oauth2AuthorizationResponseConverter oauth2AuthorizationResponseConverter) {
+        return new ResponseTypeHandlerOauth2ConsentApprovedHandler(oauth2ResponseTypeHandler, oauth2AuthorizationResponseConverter);
     }
 
     @Bean

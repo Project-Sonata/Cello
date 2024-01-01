@@ -38,7 +38,7 @@ class AuthorizeEndpointTest {
         void shouldReturnOkStatus() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectStatus().isFound();
+            responseSpec.expectStatus().isOk();
         }
 
         @Test

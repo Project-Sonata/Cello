@@ -1,23 +1,33 @@
 package com.odeyalo.sonata.cello.web;
 
-import com.odeyalo.sonata.cello.core.DefaultOauth2ResponseTypes;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
+import com.odeyalo.sonata.cello.core.RedirectUri;
+import com.odeyalo.sonata.cello.core.ScopeContainer;
+import com.odeyalo.sonata.cello.core.SimpleScope;
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for implicit response type only
@@ -37,6 +47,22 @@ public class ImplicitAuthorizeEndpointTest {
     final String AUTHENTICATION_COOKIE_NAME = "clid";
     final String AUTHENTICATION_COOKIE_VALUE = "odeyalo";
 
+    @MockBean
+    Oauth2AuthorizationRequestRepository oauth2AuthorizationRequestRepository;
+
+    @BeforeEach
+    void setUp() {
+        when(oauth2AuthorizationRequestRepository.loadAuthorizationRequest(any()))
+                .thenReturn(Mono.just(
+                        ImplicitOauth2AuthorizationRequest.builder()
+                                .clientId(EXISTING_CLIENT_ID)
+                                .redirectUri(RedirectUri.create(ALLOWED_REDIRECT_URI))
+                                .scopes(ScopeContainer.singleScope(SimpleScope.withName("read")))
+                                .state(STATE_PARAMETER_VALUE)
+                                .build()
+                ));
+
+    }
 
     @Test
     void shouldRedirectToProvidedRedirectUriAsResponse() throws URISyntaxException {
@@ -118,16 +144,13 @@ public class ImplicitAuthorizeEndpointTest {
 
     @NotNull
     private WebTestClient.ResponseSpec sendValidImplicitAuthorizeRequest() {
-        return webTestClient.get()
+        return webTestClient.post()
                 .uri(builder ->
                         builder
-                                .path("/authorize")
-                                .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.IMPLICIT.getName())
-                                .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                                .queryParam(SCOPE, "read write")
-                                .queryParam(STATE, "opaque")
+                                .path("/oauth2/consent")
                                 .build())
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .body(BodyInserters.fromFormData("action", "approved"))
                 .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                 .exchange();
     }

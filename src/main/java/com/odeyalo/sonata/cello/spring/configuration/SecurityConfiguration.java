@@ -2,8 +2,10 @@ package com.odeyalo.sonata.cello.spring.configuration;
 
 import com.odeyalo.sonata.cello.web.AuthenticationLoaderFilter;
 import com.odeyalo.sonata.cello.web.AuthorizationRequestHandlerFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -16,6 +18,12 @@ import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 public class SecurityConfiguration {
     private final AuthorizationRequestHandlerFilter authorizationRequestValidationFilter;
 
+    @Autowired
+    Customizer<ServerHttpSecurity.CsrfSpec> csrfSpecCustomizer;
+    @Autowired
+    Customizer<ServerHttpSecurity.FormLoginSpec> formLoginSpecCustomizer;
+
+
     public SecurityConfiguration(AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter) {
         this.authorizationRequestValidationFilter = authorizationRequestHandlerFilter;
     }
@@ -27,8 +35,8 @@ public class SecurityConfiguration {
                                                          ServerSecurityContextRepository securityContextRepository) {
 
         return httpSecurity
-                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .formLogin(formLoginSpecCustomizer)
+                .csrf(csrfSpecCustomizer)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .addFilterBefore(authorizationRequestValidationFilter, SecurityWebFiltersOrder.AUTHENTICATION)

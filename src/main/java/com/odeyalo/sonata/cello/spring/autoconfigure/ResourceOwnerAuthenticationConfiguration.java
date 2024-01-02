@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 
 @Configuration
 public class ResourceOwnerAuthenticationConfiguration {
@@ -32,8 +34,15 @@ public class ResourceOwnerAuthenticationConfiguration {
     @ConditionalOnMissingBean
     public ResourceOwnerAuthenticator resourceOwnerAuthenticator(ResourceOwnerAuthenticationSuccessHandler successHandler,
                                                                  ResourceOwnerAuthenticationFailureHandler failureHandler,
-                                                                 ResourceOwnerAuthenticationManager authenticationManager) {
-        return new HandlerResourceOwnerAuthenticator(authenticationManager, successHandler, failureHandler);
+                                                                 ResourceOwnerAuthenticationManager authenticationManager,
+                                                                 ServerSecurityContextRepository resourceOwnerServerSecurityContextRepository) {
+        return new HandlerResourceOwnerAuthenticator(authenticationManager, successHandler, failureHandler, resourceOwnerServerSecurityContextRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServerSecurityContextRepository resourceOwnerServerSecurityContextRepository() {
+        return new WebSessionServerSecurityContextRepository();
     }
 
     @Bean

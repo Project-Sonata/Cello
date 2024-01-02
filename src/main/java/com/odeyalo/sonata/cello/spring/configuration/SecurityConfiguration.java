@@ -1,7 +1,6 @@
 package com.odeyalo.sonata.cello.spring.configuration;
 
-import com.odeyalo.sonata.cello.spring.auth.CelloOauth2AuthenticationConverter;
-import com.odeyalo.sonata.cello.spring.auth.CelloOauth2AuthenticationManager;
+import com.odeyalo.sonata.cello.web.AuthenticationLoaderFilter;
 import com.odeyalo.sonata.cello.web.AuthorizationRequestHandlerFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,8 +8,8 @@ import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
-import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 
 @Configuration
@@ -23,12 +22,9 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity,
-                                                         CelloOauth2AuthenticationManager manager,
-                                                         ServerAuthenticationEntryPoint serverAuthenticationEntryPoint) {
-
-        AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(manager);
-
-        authenticationWebFilter.setServerAuthenticationConverter(new CelloOauth2AuthenticationConverter());
+                                                         AuthenticationLoaderFilter authenticationLoaderFilter,
+                                                         ServerAuthenticationEntryPoint serverAuthenticationEntryPoint,
+                                                         ServerSecurityContextRepository securityContextRepository) {
 
         return httpSecurity
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
@@ -36,10 +32,11 @@ public class SecurityConfiguration {
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .addFilterBefore(authorizationRequestValidationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(authenticationLoaderFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(
                         serverAuthenticationEntryPoint
                 ))
+                .securityContextRepository(securityContextRepository)
                 .authorizeExchange(authorizeExchangeSpec ->
                         authorizeExchangeSpec.pathMatchers("/login").permitAll()
                                 .anyExchange().authenticated())

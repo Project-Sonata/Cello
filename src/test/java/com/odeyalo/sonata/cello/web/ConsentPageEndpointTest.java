@@ -3,6 +3,9 @@ package com.odeyalo.sonata.cello.web;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.ScopeContainer;
+import com.odeyalo.sonata.cello.core.SimpleScope;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentPageProvider;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +20,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -45,9 +50,30 @@ public class ConsentPageEndpointTest {
 
     @MockBean
     Oauth2AuthorizationRequestRepository authorizationRequestRepository;
+    @MockBean
+    ServerSecurityContextRepository securityContextRepository;
+
+
+    // Maybe leads to fragile test ???
+    @BeforeEach
+    void prepareSecurityContextRepository() {
+        when(securityContextRepository.load(any()))
+                .thenReturn(Mono.just(
+                        new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
+                                .principal("odeyalo")
+                                .credentials("password")
+                                .resourceOwner(ResourceOwner.builder()
+                                        .principal("odeyalo")
+                                        .availableScopes(ScopeContainer.singleScope(
+                                                SimpleScope.withName("write")
+                                        )).build())
+
+                                .build())
+                ));
+    }
 
     @BeforeEach
-    void setUp() {
+    void prepareAuthorizationRequest() {
         when(authorizationRequestRepository.loadAuthorizationRequest(any()))
                 .thenReturn(Mono.just(
                         ImplicitOauth2AuthorizationRequest.builder()

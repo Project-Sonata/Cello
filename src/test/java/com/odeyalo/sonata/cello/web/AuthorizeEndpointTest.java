@@ -1,6 +1,11 @@
 package com.odeyalo.sonata.cello.web;
 
+import com.odeyalo.sonata.cello.core.ScopeContainer;
+import com.odeyalo.sonata.cello.core.SimpleScope;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -8,11 +13,17 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
@@ -27,12 +38,30 @@ class AuthorizeEndpointTest {
     @Autowired
     WebTestClient webTestClient;
 
-    final String AUTHENTICATION_COOKIE_NAME = "clid";
-    final String AUTHENTICATION_COOKIE_VALUE = "odeyalo";
+    @MockBean
+    ServerSecurityContextRepository securityContextRepository;
 
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
     class ValidRequestTest {
+
+        // Maybe leads to fragile test ???
+        @BeforeEach
+        void setUp() {
+            when(securityContextRepository.load(any()))
+                    .thenReturn(Mono.just(
+                            new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
+                                    .principal("odeyalo")
+                                    .credentials("password")
+                                    .resourceOwner(ResourceOwner.builder()
+                                            .principal("odeyalo")
+                                            .availableScopes(ScopeContainer.singleScope(
+                                                    SimpleScope.withName("write")
+                                            )).build())
+
+                                    .build())
+                    ));
+        }
 
         @Test
         void shouldReturnOkStatus() {
@@ -52,7 +81,6 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
-                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -69,7 +97,6 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
-                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -87,7 +114,6 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
-                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -105,7 +131,6 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
-                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
 
             exchange.expectStatus().isBadRequest();
@@ -123,7 +148,6 @@ class AuthorizeEndpointTest {
                                     .queryParam(SCOPE, "read write")
                                     .queryParam(STATE, "opaque")
                                     .build())
-                    .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                     .exchange();
         }
     }

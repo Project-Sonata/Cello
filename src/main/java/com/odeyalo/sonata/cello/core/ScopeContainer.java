@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Immutable container for scopes
@@ -64,5 +65,9 @@ public class ScopeContainer implements Iterable<Scope> {
     @Override
     public Iterator<Scope> iterator() {
         return scopes.iterator();
+    }
+
+    public Stream<Scope> stream() {
+        return getScopes().stream();
     }
 }

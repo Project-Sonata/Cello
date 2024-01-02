@@ -1,7 +1,6 @@
 package com.odeyalo.sonata.cello.core.authentication.resourceowner;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.web.server.DefaultServerRedirectStrategy;
 import org.springframework.security.web.server.ServerRedirectStrategy;
 import org.springframework.web.server.ServerWebExchange;
@@ -21,7 +20,6 @@ public class ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler imp
     public Mono<Void> onAuthenticationSuccess(@NotNull ServerWebExchange exchange,
                                               @NotNull AuthenticatedResourceOwnerAuthentication authentication) {
 
-        exchange.getResponse().addCookie(ResponseCookie.from("clid", "odeyalo").build());
         return redirectStrategy.sendRedirect(exchange, CONSENT_PAGE_URI);
     }
 }

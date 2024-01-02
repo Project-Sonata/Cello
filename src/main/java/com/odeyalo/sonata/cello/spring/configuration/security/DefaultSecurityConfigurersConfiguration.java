@@ -9,7 +9,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 
 @Configuration
-public class DefaultConfigurersConfiguration {
+public class DefaultSecurityConfigurersConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(value = ServerHttpSecurity.CsrfSpec.class, parameterizedContainer = Customizer.class)

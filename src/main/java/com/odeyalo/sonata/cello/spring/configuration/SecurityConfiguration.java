@@ -1,52 +1,58 @@
 package com.odeyalo.sonata.cello.spring.configuration;
 
+import com.odeyalo.sonata.cello.spring.configuration.security.customizer.CelloOauth2SecurityCustomizer;
 import com.odeyalo.sonata.cello.web.AuthenticationLoaderFilter;
 import com.odeyalo.sonata.cello.web.AuthorizationRequestHandlerFilter;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
-import org.springframework.security.web.server.authentication.RedirectServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 
 @Configuration
+@Builder
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SecurityConfiguration {
-    private final AuthorizationRequestHandlerFilter authorizationRequestValidationFilter;
-
-    public SecurityConfiguration(AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter) {
-        this.authorizationRequestValidationFilter = authorizationRequestHandlerFilter;
-    }
+    @Autowired
+    Customizer<ServerHttpSecurity.CsrfSpec> csrfSpecConfigurer;
+    @Autowired
+    Customizer<ServerHttpSecurity.FormLoginSpec> formLoginSpecConfigurer;
+    @Autowired
+    Customizer<ServerHttpSecurity.CorsSpec> corsSpecConfigurer;
+    @Autowired
+    Customizer<ServerHttpSecurity.ExceptionHandlingSpec> exceptionHandlingSpecConfigurer;
+    @Autowired
+    Customizer<ServerHttpSecurity.AuthorizeExchangeSpec> authorizeExchangeSpecConfigurer;
+    @Autowired
+    CelloOauth2SecurityCustomizer oauth2SecurityCustomizer;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity,
+                                                         AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter,
                                                          AuthenticationLoaderFilter authenticationLoaderFilter,
-                                                         ServerAuthenticationEntryPoint serverAuthenticationEntryPoint,
                                                          ServerSecurityContextRepository securityContextRepository) {
 
-        return httpSecurity
-                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
-                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .addFilterBefore(authorizationRequestValidationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+        ServerHttpSecurity serverHttpSecurity = httpSecurity
+                .formLogin(formLoginSpecConfigurer)
+                .csrf(csrfSpecConfigurer)
+                .cors(corsSpecConfigurer)
+                .addFilterBefore(authorizationRequestHandlerFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(authenticationLoaderFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(
-                        serverAuthenticationEntryPoint
-                ))
+                .exceptionHandling(exceptionHandlingSpecConfigurer)
                 .securityContextRepository(securityContextRepository)
-                .authorizeExchange(authorizeExchangeSpec ->
-                        authorizeExchangeSpec.pathMatchers("/login").permitAll()
-                                .anyExchange().authenticated())
-                .build();
-    }
+                .authorizeExchange(authorizeExchangeSpecConfigurer);
 
-    @Bean
-    public ServerAuthenticationEntryPoint serverAuthenticationEntryPoint(ServerRequestCache cache) {
-        RedirectServerAuthenticationEntryPoint entryPoint = new RedirectServerAuthenticationEntryPoint("/login");
-        entryPoint.setRequestCache(cache);
-        return entryPoint;
+        oauth2SecurityCustomizer.customize(serverHttpSecurity);
+
+        return serverHttpSecurity.build();
+
     }
 }

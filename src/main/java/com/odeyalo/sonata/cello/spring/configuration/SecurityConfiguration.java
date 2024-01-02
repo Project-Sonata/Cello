@@ -9,10 +9,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
-import org.springframework.security.web.server.authentication.RedirectServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 
 @Configuration
 public class SecurityConfiguration {
@@ -22,9 +19,10 @@ public class SecurityConfiguration {
     Customizer<ServerHttpSecurity.CsrfSpec> csrfSpecCustomizer;
     @Autowired
     Customizer<ServerHttpSecurity.FormLoginSpec> formLoginSpecCustomizer;
-
     @Autowired
     Customizer<ServerHttpSecurity.CorsSpec> corsSpecCustomizer;
+    @Autowired
+    Customizer<ServerHttpSecurity.ExceptionHandlingSpec> exceptionHandlingSpecCustomizer;
 
     public SecurityConfiguration(AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter) {
         this.authorizationRequestValidationFilter = authorizationRequestHandlerFilter;
@@ -33,7 +31,6 @@ public class SecurityConfiguration {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity,
                                                          AuthenticationLoaderFilter authenticationLoaderFilter,
-                                                         ServerAuthenticationEntryPoint serverAuthenticationEntryPoint,
                                                          ServerSecurityContextRepository securityContextRepository) {
 
         return httpSecurity
@@ -42,20 +39,11 @@ public class SecurityConfiguration {
                 .cors(corsSpecCustomizer)
                 .addFilterBefore(authorizationRequestValidationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(authenticationLoaderFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(
-                        serverAuthenticationEntryPoint
-                ))
+                .exceptionHandling(exceptionHandlingSpecCustomizer)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange(authorizeExchangeSpec ->
                         authorizeExchangeSpec.pathMatchers("/login").permitAll()
                                 .anyExchange().authenticated())
                 .build();
-    }
-
-    @Bean
-    public ServerAuthenticationEntryPoint serverAuthenticationEntryPoint(ServerRequestCache cache) {
-        RedirectServerAuthenticationEntryPoint entryPoint = new RedirectServerAuthenticationEntryPoint("/login");
-        entryPoint.setRequestCache(cache);
-        return entryPoint;
     }
 }

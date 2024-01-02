@@ -1,9 +1,6 @@
 package com.odeyalo.sonata.cello.spring.configuration.security;
 
-import com.odeyalo.sonata.cello.spring.configuration.security.configurer.DisabledCorsConfigurer;
-import com.odeyalo.sonata.cello.spring.configuration.security.configurer.DisabledCsrfConfigurer;
-import com.odeyalo.sonata.cello.spring.configuration.security.configurer.DisabledFormLoginConfigurer;
-import com.odeyalo.sonata.cello.spring.configuration.security.configurer.CelloExceptionHandlingConfigurer;
+import com.odeyalo.sonata.cello.spring.configuration.security.configurer.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +33,12 @@ public class DefaultSecurityConfigurersConfiguration {
     @ConditionalOnMissingBean(value = ServerHttpSecurity.ExceptionHandlingSpec.class, parameterizedContainer = Customizer.class)
     public Customizer<ServerHttpSecurity.ExceptionHandlingSpec> exceptionHandlingSpecCustomizer(ServerAuthenticationEntryPoint serverAuthenticationEntryPoint) {
         return new CelloExceptionHandlingConfigurer(serverAuthenticationEntryPoint);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(value = ServerHttpSecurity.AuthorizeExchangeSpec.class, parameterizedContainer = Customizer.class)
+    public Customizer<ServerHttpSecurity.AuthorizeExchangeSpec> authorizeExchangeSpecCustomizer() {
+        return new CelloAuthorizeExchangeConfigurer();
     }
 
 }

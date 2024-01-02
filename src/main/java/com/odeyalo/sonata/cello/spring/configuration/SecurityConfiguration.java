@@ -23,6 +23,8 @@ public class SecurityConfiguration {
     Customizer<ServerHttpSecurity.CorsSpec> corsSpecCustomizer;
     @Autowired
     Customizer<ServerHttpSecurity.ExceptionHandlingSpec> exceptionHandlingSpecCustomizer;
+    @Autowired
+    Customizer<ServerHttpSecurity.AuthorizeExchangeSpec> authorizeExchangeSpecCustomizer;
 
     public SecurityConfiguration(AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter) {
         this.authorizationRequestValidationFilter = authorizationRequestHandlerFilter;
@@ -41,9 +43,7 @@ public class SecurityConfiguration {
                 .addFilterAt(authenticationLoaderFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling(exceptionHandlingSpecCustomizer)
                 .securityContextRepository(securityContextRepository)
-                .authorizeExchange(authorizeExchangeSpec ->
-                        authorizeExchangeSpec.pathMatchers("/login").permitAll()
-                                .anyExchange().authenticated())
+                .authorizeExchange(authorizeExchangeSpecCustomizer)
                 .build();
     }
 }

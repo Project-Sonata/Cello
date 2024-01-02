@@ -64,10 +64,17 @@ class AuthorizeEndpointTest {
         }
 
         @Test
-        void shouldReturnOkStatus() {
+        void shouldReturnRedirectStatus() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectStatus().isOk();
+            responseSpec.expectStatus().isFound();
+        }
+
+        @Test
+        void shouldReturnRedirectToConsentPage() {
+            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
+
+            responseSpec.expectHeader().location("/oauth2/consent");
         }
 
         @Test

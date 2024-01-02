@@ -12,13 +12,13 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 public class DefaultConfigurersConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(value = ServerHttpSecurity.CsrfSpec.class, parameterizedContainer = Customizer.class)
     public Customizer<ServerHttpSecurity.CsrfSpec> csrfSpecCustomizer() {
         return new DisabledCsrfConfigurer();
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(value = ServerHttpSecurity.FormLoginSpec.class, parameterizedContainer = Customizer.class)
     public Customizer<ServerHttpSecurity.FormLoginSpec> formLoginSpecCustomizer() {
         return new DisabledFormLoginConfigurer();
     }

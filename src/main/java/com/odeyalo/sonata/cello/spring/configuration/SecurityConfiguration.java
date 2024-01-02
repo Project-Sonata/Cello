@@ -40,7 +40,6 @@ public class SecurityConfiguration {
                 .formLogin(formLoginSpecCustomizer)
                 .csrf(csrfSpecCustomizer)
                 .cors(corsSpecCustomizer)
-                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .addFilterBefore(authorizationRequestValidationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(authenticationLoaderFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(

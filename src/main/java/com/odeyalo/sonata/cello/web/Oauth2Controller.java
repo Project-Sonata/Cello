@@ -1,13 +1,14 @@
 package com.odeyalo.sonata.cello.web;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentPageProvider;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentSubmissionHandler;
-import com.odeyalo.sonata.cello.core.responsetype.Oauth2ResponseTypeHandler;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,27 +25,29 @@ public class Oauth2Controller {
     private final ResourceOwnerAuthenticator resourceOwnerAuthenticationManager;
     private final AuthenticationPageProvider authenticationPageProvider;
 
-    private final Oauth2AuthorizationResponseConverter converter;
-    private final Oauth2ResponseTypeHandler oauth2ResponseTypeHandler;
     private final Oauth2ConsentPageProvider oauth2ConsentPageProvider;
     private final Oauth2ConsentSubmissionHandler oauth2ConsentSubmissionHandler;
 
     public Oauth2Controller(ResourceOwnerAuthenticator resourceOwnerAuthenticationManager,
-                            AuthenticationPageProvider authenticationPageProvider, Oauth2AuthorizationResponseConverter converter, Oauth2ResponseTypeHandler oauth2ResponseTypeHandler, Oauth2ConsentPageProvider oauth2ConsentPageProvider, Oauth2ConsentSubmissionHandler oauth2ConsentSubmissionHandler) {
+                            AuthenticationPageProvider authenticationPageProvider,
+                            Oauth2ConsentPageProvider oauth2ConsentPageProvider,
+                            Oauth2ConsentSubmissionHandler oauth2ConsentSubmissionHandler) {
 
         this.resourceOwnerAuthenticationManager = resourceOwnerAuthenticationManager;
         this.authenticationPageProvider = authenticationPageProvider;
-        this.converter = converter;
-        this.oauth2ResponseTypeHandler = oauth2ResponseTypeHandler;
         this.oauth2ConsentPageProvider = oauth2ConsentPageProvider;
         this.oauth2ConsentSubmissionHandler = oauth2ConsentSubmissionHandler;
     }
 
     @GetMapping(value = "/authorize")
     @ResponseBody
-    public Mono<Void> handleAuthorize() {
+    public Mono<ResponseEntity<Void>> handleAuthorize() {
 
-        return Mono.empty();
+        return Mono.just(
+                ResponseEntity.status(HttpStatus.FOUND)
+                        .header(HttpHeaders.LOCATION, "/oauth2/consent")
+                        .build()
+        );
     }
 
 

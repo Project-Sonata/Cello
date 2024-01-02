@@ -4,6 +4,8 @@ import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.ScopeContainer;
 import com.odeyalo.sonata.cello.core.SimpleScope;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -44,14 +48,13 @@ public class ImplicitAuthorizeEndpointTest {
     @Autowired
     WebTestClient webTestClient;
 
-    final String AUTHENTICATION_COOKIE_NAME = "clid";
-    final String AUTHENTICATION_COOKIE_VALUE = "odeyalo";
-
     @MockBean
     Oauth2AuthorizationRequestRepository oauth2AuthorizationRequestRepository;
+    @MockBean
+    ServerSecurityContextRepository securityContextRepository;
 
     @BeforeEach
-    void setUp() {
+    void prepareAuthorizationRequest() {
         when(oauth2AuthorizationRequestRepository.loadAuthorizationRequest(any()))
                 .thenReturn(Mono.just(
                         ImplicitOauth2AuthorizationRequest.builder()
@@ -62,6 +65,26 @@ public class ImplicitAuthorizeEndpointTest {
                                 .build()
                 ));
 
+
+
+    }
+
+    // Maybe leads to fragile test ???
+    @BeforeEach
+    void prepareSecurityContextRepository() {
+        when(securityContextRepository.load(any()))
+                .thenReturn(Mono.just(
+                        new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
+                                .principal("odeyalo")
+                                .credentials("password")
+                                .resourceOwner(ResourceOwner.builder()
+                                        .principal("odeyalo")
+                                        .availableScopes(ScopeContainer.singleScope(
+                                                SimpleScope.withName("write")
+                                        )).build())
+
+                                .build())
+                ));
     }
 
     @Test
@@ -151,7 +174,6 @@ public class ImplicitAuthorizeEndpointTest {
                                 .build())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .body(BodyInserters.fromFormData("action", "approved"))
-                .cookie(AUTHENTICATION_COOKIE_NAME, AUTHENTICATION_COOKIE_VALUE)
                 .exchange();
     }
 }

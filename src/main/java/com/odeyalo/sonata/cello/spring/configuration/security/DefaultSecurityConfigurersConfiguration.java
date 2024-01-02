@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.spring.configuration.security;
 
+import com.odeyalo.sonata.cello.spring.configuration.security.configurer.DisabledCorsConfigurer;
 import com.odeyalo.sonata.cello.spring.configuration.security.configurer.DisabledCsrfConfigurer;
 import com.odeyalo.sonata.cello.spring.configuration.security.configurer.DisabledFormLoginConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -21,6 +22,12 @@ public class DefaultSecurityConfigurersConfiguration {
     @ConditionalOnMissingBean(value = ServerHttpSecurity.FormLoginSpec.class, parameterizedContainer = Customizer.class)
     public Customizer<ServerHttpSecurity.FormLoginSpec> formLoginSpecCustomizer() {
         return new DisabledFormLoginConfigurer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(value = ServerHttpSecurity.CorsSpec.class, parameterizedContainer = Customizer.class)
+    public Customizer<ServerHttpSecurity.CorsSpec> corsSpecCustomizer() {
+        return new DisabledCorsConfigurer();
     }
 
 }

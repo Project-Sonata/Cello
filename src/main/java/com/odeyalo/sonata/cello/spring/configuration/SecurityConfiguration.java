@@ -23,6 +23,8 @@ public class SecurityConfiguration {
     @Autowired
     Customizer<ServerHttpSecurity.FormLoginSpec> formLoginSpecCustomizer;
 
+    @Autowired
+    Customizer<ServerHttpSecurity.CorsSpec> corsSpecCustomizer;
 
     public SecurityConfiguration(AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter) {
         this.authorizationRequestValidationFilter = authorizationRequestHandlerFilter;
@@ -37,7 +39,7 @@ public class SecurityConfiguration {
         return httpSecurity
                 .formLogin(formLoginSpecCustomizer)
                 .csrf(csrfSpecCustomizer)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
+                .cors(corsSpecCustomizer)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .addFilterBefore(authorizationRequestValidationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(authenticationLoaderFilter, SecurityWebFiltersOrder.AUTHENTICATION)

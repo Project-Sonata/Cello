@@ -1,5 +1,8 @@
 package com.odeyalo.sonata.cello.spring.configuration;
 
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestConverter;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
+import com.odeyalo.sonata.cello.core.validation.Oauth2AuthorizationRequestValidator;
 import com.odeyalo.sonata.cello.spring.configuration.security.customizer.CelloOauth2SecurityCustomizer;
 import com.odeyalo.sonata.cello.web.AuthenticationLoaderFilter;
 import com.odeyalo.sonata.cello.web.AuthorizationRequestHandlerFilter;
@@ -36,16 +39,17 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity,
-                                                         AuthorizationRequestHandlerFilter authorizationRequestHandlerFilter,
-                                                         AuthenticationLoaderFilter authenticationLoaderFilter,
-                                                         ServerSecurityContextRepository securityContextRepository) {
+                                                         ServerSecurityContextRepository securityContextRepository,
+                                                         Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter,
+                                                         Oauth2AuthorizationRequestValidator oauth2AuthorizationRequestValidator,
+                                                         Oauth2AuthorizationRequestRepository authorizationRequestRepository) {
 
         ServerHttpSecurity serverHttpSecurity = httpSecurity
                 .formLogin(formLoginSpecConfigurer)
                 .csrf(csrfSpecConfigurer)
                 .cors(corsSpecConfigurer)
-                .addFilterBefore(authorizationRequestHandlerFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .addFilterAt(authenticationLoaderFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterBefore(new AuthorizationRequestHandlerFilter(oauth2AuthorizationRequestConverter, oauth2AuthorizationRequestValidator, authorizationRequestRepository), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(new AuthenticationLoaderFilter(securityContextRepository), SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling(exceptionHandlingSpecConfigurer)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange(authorizeExchangeSpecConfigurer);

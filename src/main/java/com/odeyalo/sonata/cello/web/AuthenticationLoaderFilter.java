@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -15,7 +14,6 @@ import reactor.core.publisher.Mono;
  * Filter to load the authentication from {@link ServerSecurityContextRepository} if present,
  * otherwise the {@link WebFilterChain} is continued as default
  */
-@Component
 public class AuthenticationLoaderFilter implements WebFilter {
     private final ServerSecurityContextRepository securityContextRepository;
     private final Logger logger = LoggerFactory.getLogger(AuthenticationLoaderFilter.class);

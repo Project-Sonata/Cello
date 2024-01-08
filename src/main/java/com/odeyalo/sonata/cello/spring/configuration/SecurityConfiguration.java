@@ -6,6 +6,7 @@ import com.odeyalo.sonata.cello.core.validation.Oauth2AuthorizationRequestValida
 import com.odeyalo.sonata.cello.spring.configuration.security.customizer.CelloOauth2SecurityCustomizer;
 import com.odeyalo.sonata.cello.web.AuthenticationLoaderFilter;
 import com.odeyalo.sonata.cello.web.AuthorizationRequestHandlerFilter;
+import com.odeyalo.sonata.cello.web.Oauth2FlowAttributePopulatingFilter;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -48,6 +49,7 @@ public class SecurityConfiguration {
                 .formLogin(formLoginSpecConfigurer)
                 .csrf(csrfSpecConfigurer)
                 .cors(corsSpecConfigurer)
+                .addFilterBefore(new Oauth2FlowAttributePopulatingFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterBefore(new AuthorizationRequestHandlerFilter(oauth2AuthorizationRequestConverter, oauth2AuthorizationRequestValidator, authorizationRequestRepository), SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(new AuthenticationLoaderFilter(securityContextRepository), SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling(exceptionHandlingSpecConfigurer)

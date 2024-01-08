@@ -45,9 +45,9 @@ public class ImplicitAuthorizeEndpointTest {
     public static final String STATE_PARAMETER_VALUE = "opaque";
     public static final String EXISTING_CLIENT_ID = "123";
     public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
+
     @Autowired
     WebTestClient webTestClient;
-
     @MockBean
     Oauth2AuthorizationRequestRepository oauth2AuthorizationRequestRepository;
     @MockBean
@@ -64,9 +64,6 @@ public class ImplicitAuthorizeEndpointTest {
                                 .state(STATE_PARAMETER_VALUE)
                                 .build()
                 ));
-
-
-
     }
 
     // Maybe leads to fragile test ???

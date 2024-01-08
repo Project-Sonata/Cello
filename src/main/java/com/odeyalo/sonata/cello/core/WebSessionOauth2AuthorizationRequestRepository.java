@@ -27,9 +27,7 @@ public class WebSessionOauth2AuthorizationRequestRepository implements Oauth2Aut
         String currentFlowId = httpExchange.getAttribute(CURRENT_FLOW_ATTRIBUTE_NAME);
 
         if ( currentFlowId == null ) {
-            return Mono.error(
-                    new IllegalStateException("Missing {" + CURRENT_FLOW_ATTRIBUTE_NAME + "} attribute")
-            );
+            return missingFlowAttributeError();
         }
 
         return httpExchange.getSession()
@@ -44,9 +42,7 @@ public class WebSessionOauth2AuthorizationRequestRepository implements Oauth2Aut
         String currentFlowId = httpExchange.getAttribute(CURRENT_FLOW_ATTRIBUTE_NAME);
 
         if ( currentFlowId == null ) {
-            return Mono.error(
-                    new IllegalStateException("Missing {" + CURRENT_FLOW_ATTRIBUTE_NAME + "} attribute")
-            );
+            return missingFlowAttributeError();
         }
 
         return httpExchange.getSession()
@@ -62,9 +58,7 @@ public class WebSessionOauth2AuthorizationRequestRepository implements Oauth2Aut
         String currentFlowId = httpExchange.getAttribute(CURRENT_FLOW_ATTRIBUTE_NAME);
 
         if ( currentFlowId == null ) {
-            return Mono.error(
-                    new IllegalStateException("Missing {" + CURRENT_FLOW_ATTRIBUTE_NAME + "} attribute")
-            );
+            return missingFlowAttributeError();
         }
 
         return httpExchange.getSession()
@@ -78,5 +72,12 @@ public class WebSessionOauth2AuthorizationRequestRepository implements Oauth2Aut
         HashMap<String, Oauth2AuthorizationRequest> authorizationRequests = session.getAttributeOrDefault(AUTHORIZATION_REQUESTS_KEY, new HashMap<>());
         session.getAttributes().putIfAbsent(AUTHORIZATION_REQUESTS_KEY, authorizationRequests);
         authorizationRequests.put(currentFlowId, authorizationRequest);
+    }
+
+    @NotNull
+    private static <T> Mono<T> missingFlowAttributeError() {
+        return Mono.error(
+                new IllegalStateException("Missing {" + CURRENT_FLOW_ATTRIBUTE_NAME + "} attribute")
+        );
     }
 }

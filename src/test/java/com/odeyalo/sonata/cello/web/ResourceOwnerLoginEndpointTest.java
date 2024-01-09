@@ -21,6 +21,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
+import testing.UriUtils;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.io.UnsupportedEncodingException;
@@ -82,7 +83,7 @@ public class ResourceOwnerLoginEndpointTest {
         URI uri = result.getResponseHeaders().getLocation();
         ResponseCookie sessionId = result.getResponseCookies().getFirst("SESSION");
 
-        currentFlowId = parseQueryParameters(uri).get("flow_id");
+        currentFlowId = UriUtils.parseQueryParameters(uri).get("flow_id");
         currentSessionId = sessionId.getValue();
     }
 
@@ -159,7 +160,7 @@ public class ResourceOwnerLoginEndpointTest {
 
         assertThat(uri).isNotNull();
 
-        assertThat(parseQueryParameters(uri).get("flow_id"))
+        assertThat(UriUtils.parseQueryParameters(uri).get("flow_id"))
                 .isNotEmpty();
     }
 
@@ -189,16 +190,5 @@ public class ResourceOwnerLoginEndpointTest {
                 .body(BodyInserters.fromFormData(formData))
                 .cookie("SESSION", currentSessionId)
                 .exchange();
-    }
-
-    public static Map<String, String> parseQueryParameters(URI url) throws UnsupportedEncodingException {
-        Map<String, String> queryPairs = new HashMap<>();
-        String query = url.getQuery();
-        String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            int idx = pair.indexOf("=");
-            queryPairs.put(URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8), URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8));
-        }
-        return queryPairs;
     }
 }

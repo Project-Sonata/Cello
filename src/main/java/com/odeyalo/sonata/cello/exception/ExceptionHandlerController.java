@@ -2,7 +2,6 @@ package com.odeyalo.sonata.cello.exception;
 
 import com.odeyalo.sonata.cello.exception.handler.ExceptionHandlingStrategy;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,6 +26,7 @@ public class ExceptionHandlerController implements ErrorWebExceptionHandler {
     }
 
     @Override
+    @NotNull
     public Mono<Void> handle(@NotNull ServerWebExchange exchange, @NotNull Throwable ex) {
         return Flux.fromIterable(exceptionHandlers)
                 .filterWhen(strategy -> strategy.supports(ex))

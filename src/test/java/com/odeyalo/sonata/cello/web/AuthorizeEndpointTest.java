@@ -77,10 +77,34 @@ class AuthorizeEndpointTest {
         }
 
         @Test
-        void shouldReturnRedirectToConsentPage() {
+        void shouldReturnRedirectToConsentPage() throws URISyntaxException {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectHeader().location("/oauth2/consent");
+            HttpHeaders headers = responseSpec.returnResult(String.class).getResponseHeaders();
+
+            URI uri = headers.getLocation();
+
+            assertThat(uri).isNotNull();
+            assertThat(
+                    new URI(uri.getScheme(),
+                            uri.getAuthority(),
+                            uri.getPath(),
+                            null, // Ignore the query part of the input url
+                            uri.getFragment())
+                            .toString()
+            ).isEqualTo("/oauth2/consent");
+        }
+
+        @Test
+        void shouldReturnRedirectToConsentPageAndContainFlowId() {
+            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
+
+            HttpHeaders headers = responseSpec.returnResult(String.class).getResponseHeaders();
+
+            URI uri = headers.getLocation();
+
+            assertThat(uri).isNotNull();
+            assertThat(uri).hasParameter("flow_id");
         }
 
         @Test

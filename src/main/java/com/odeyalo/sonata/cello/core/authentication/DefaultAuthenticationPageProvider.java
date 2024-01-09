@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.core.authentication;
 
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,17 +14,20 @@ public class DefaultAuthenticationPageProvider implements AuthenticationPageProv
     @Override
     @NotNull
     public Mono<ServerHttpResponse> getAuthenticationPage(@NotNull ServerWebExchange exchange) {
+        String flowId = exchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
+
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.OK);
         response.getHeaders().setContentType(MediaType.TEXT_HTML);
+
         return response.writeWith(
-                        Flux.just(getContent()).map(s -> response.bufferFactory().wrap(s.getBytes()))
+                        Flux.just(getContent(flowId)).map(s -> response.bufferFactory().wrap(s.getBytes()))
                 )
                 .thenReturn(response);
 
     }
 
-    private String getContent() {
+    private String getContent(String flowId) {
         return "<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
                 "<head>\n" +
@@ -91,6 +95,7 @@ public class DefaultAuthenticationPageProvider implements AuthenticationPageProv
                 "<div class=\"login-container\">\n" +
                 "    <h2>Login</h2>\n" +
                 "    <form class=\"login-form\" action=\"/login\" method=\"post\">\n" +
+                "<input type=\"hidden\" name=\"flow_id\" value=\"" + flowId + "\">" +
                 "        <div class=\"form-group\">\n" +
                 "            <label for=\"username\">Username:</label>\n" +
                 "            <input type=\"text\" id=\"username\" name=\"username\" required>\n" +

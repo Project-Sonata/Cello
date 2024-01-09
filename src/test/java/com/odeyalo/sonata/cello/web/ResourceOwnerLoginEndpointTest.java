@@ -62,7 +62,7 @@ public class ResourceOwnerLoginEndpointTest {
 
 
     @BeforeEach
-    void setUp() throws UnsupportedEncodingException {
+    void setUp() {
         WebTestClient.ResponseSpec exchange = webTestClient.get()
                 .uri(builder ->
                         builder

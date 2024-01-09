@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.web;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
@@ -41,11 +42,13 @@ public class Oauth2Controller {
 
     @GetMapping(value = "/authorize")
     @ResponseBody
-    public Mono<ResponseEntity<Void>> handleAuthorize() {
+    public Mono<ResponseEntity<Void>> handleAuthorize(ServerWebExchange webExchange) {
+
+        String flowId = webExchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
 
         return Mono.just(
                 ResponseEntity.status(HttpStatus.FOUND)
-                        .header(HttpHeaders.LOCATION, "/oauth2/consent")
+                        .header(HttpHeaders.LOCATION, "/oauth2/consent?flow_id=" + flowId)
                         .build()
         );
     }

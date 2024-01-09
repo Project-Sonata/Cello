@@ -183,11 +183,9 @@ public class ResourceOwnerLoginEndpointTest {
 
     @NotNull
     private WebTestClient.ResponseSpec sendLoginRequest(MultiValueMap<String, String> formData) {
+        formData.add("flow_id", currentFlowId);
         return webTestClient.post()
-                .uri(builder -> builder
-                        .path("/login")
-                        .queryParam("flow_id", currentFlowId)
-                        .build())
+                .uri("/login")
                 .body(BodyInserters.fromFormData(formData))
                 .cookie("SESSION", currentSessionId)
                 .exchange();

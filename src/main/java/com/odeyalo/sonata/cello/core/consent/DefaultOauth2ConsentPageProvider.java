@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.core.consent;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ public final class DefaultOauth2ConsentPageProvider implements Oauth2ConsentPage
     public Mono<Void> getConsentPage(@NotNull Oauth2AuthorizationRequest request, @NotNull ResourceOwner resourceOwner, @NotNull ServerWebExchange httpExchange) {
         ServerHttpResponse response = httpExchange.getResponse();
         response.getHeaders().setContentType(MediaType.TEXT_HTML);
+        String flowId = httpExchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
 
         return response.writeWith(Flux.just(response.bufferFactory().wrap(("<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
@@ -80,6 +82,7 @@ public final class DefaultOauth2ConsentPageProvider implements Oauth2ConsentPage
                 "    <p>You are granting access to the following scopes:</p>\n" +
                 "\n" +
                 "    <form id=\"oauth2ConsentForm\" action=\"/oauth2/consent\" method=\"post\">\n" +
+                "<input type=\"hidden\" name=\"flow_id\" value=\"" +  flowId + "\">" +
                 "        <label>\n" +
                 "            <input type=\"checkbox\" name=\"scope[]\" value=\"read_data\" required>\n" +
                 "            Read Data\n" +

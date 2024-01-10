@@ -6,33 +6,31 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import testing.AutoconfigureCelloWebTestClient;
+import testing.CelloWebTestClient;
+import testing.ImplicitSpecs;
 import testing.WithAuthenticatedResourceOwner;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
-@AutoConfigureWebTestClient
+@AutoconfigureCelloWebTestClient
 @ActiveProfiles("test")
 @RegisterOauth2Clients
 class AuthorizeEndpointTest {
 
-    public static final String EXISTING_CLIENT_ID = "123";
-    public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
-
     @Autowired
-    WebTestClient webTestClient;
+    CelloWebTestClient celloWebTestClient;
 
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
@@ -79,83 +77,38 @@ class AuthorizeEndpointTest {
 
         @Test
         void shouldReturn400BadRequestIfResponseTypeNotIncluded() {
-            WebTestClient.ResponseSpec exchange = webTestClient.get()
-                    .uri(builder ->
-                            builder
-                                    .path("/authorize")
-                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                                    .queryParam(SCOPE, "read write")
-                                    .queryParam(STATE, "opaque")
-                                    .build())
-                    .exchange();
+            CelloWebTestClient.ImplicitSpec validImplicitSpec = ImplicitSpecs.valid();
 
-            exchange.expectStatus().isBadRequest();
+            WebTestClient.ResponseSpec responseSpec = celloWebTestClient.implicit().sendUnknownAuthorizationRequest(validImplicitSpec);
+
+            responseSpec.expectStatus().isBadRequest();
         }
 
         @Test
         void shouldReturn400BadRequestIfClientIdNotIncluded() {
-            WebTestClient.ResponseSpec exchange = webTestClient.get()
-                    .uri(builder ->
-                            builder
-                                    .path("/authorize")
-                                    .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                                    .queryParam(SCOPE, "read write")
-                                    .queryParam(STATE, "opaque")
-                                    .build())
-                    .exchange();
+            CelloWebTestClient.ImplicitSpec withoutClientId = ImplicitSpecs.withoutClientId();
 
-            exchange.expectStatus().isBadRequest();
+            WebTestClient.ResponseSpec responseSpec = celloWebTestClient.implicit().sendRequest(withoutClientId);
+
+            responseSpec.expectStatus().isBadRequest();
         }
 
         @Test
         void shouldReturn400BadRequestIfClientIdIsNotExist() {
-            WebTestClient.ResponseSpec exchange = webTestClient.get()
-                    .uri(builder ->
-                            builder
-                                    .path("/authorize")
-                                    .queryParam(CLIENT_ID, "not_exist")
-                                    .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                                    .queryParam(SCOPE, "read write")
-                                    .queryParam(STATE, "opaque")
-                                    .build())
-                    .exchange();
+            CelloWebTestClient.ImplicitSpec withNotExistingClientId = ImplicitSpecs.withInvalidClientId();
 
-            exchange.expectStatus().isBadRequest();
+            WebTestClient.ResponseSpec responseSpec = celloWebTestClient.implicit().sendRequest(withNotExistingClientId);
+
+            responseSpec.expectStatus().isBadRequest();
         }
 
         @Test
         void shouldReturn400BadRequestIfRedirectUriIsNotRegistered() {
-            WebTestClient.ResponseSpec exchange = webTestClient.get()
-                    .uri(builder ->
-                            builder
-                                    .path("/authorize")
-                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                    .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(REDIRECT_URI, "http:localhost:9812/redirect/not/allowed")
-                                    .queryParam(SCOPE, "read write")
-                                    .queryParam(STATE, "opaque")
-                                    .build())
-                    .exchange();
+            CelloWebTestClient.ImplicitSpec withUnallowedRedirectUri = ImplicitSpecs.withUnallowedRedirectUri();
 
-            exchange.expectStatus().isBadRequest();
-        }
+            WebTestClient.ResponseSpec responseSpec = celloWebTestClient.implicit().sendRequest(withUnallowedRedirectUri);
 
-        @NotNull
-        private WebTestClient.ResponseSpec sendValidAuthorizeRequest() {
-            return webTestClient.get()
-                    .uri(builder ->
-                            builder
-                                    .path("/authorize")
-                                    .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                                    .queryParam(SCOPE, "read write")
-                                    .queryParam(STATE, "opaque")
-                                    .build())
-                    .exchange();
+            responseSpec.expectStatus().isBadRequest();
         }
     }
 
@@ -204,20 +157,12 @@ class AuthorizeEndpointTest {
 
             assertThat(uri).hasParameter("flow_id");
         }
+    }
 
-        @NotNull
-        private WebTestClient.ResponseSpec sendValidAuthorizeRequest() {
-            return webTestClient.get()
-                    .uri(builder ->
-                            builder
-                                    .path("/authorize")
-                                    .queryParam(RESPONSE_TYPE, "token")
-                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                                    .queryParam(SCOPE, "read write")
-                                    .queryParam(STATE, "opaque")
-                                    .build())
-                    .exchange();
-        }
+    @NotNull
+    private WebTestClient.ResponseSpec sendValidAuthorizeRequest() {
+        CelloWebTestClient.ImplicitSpec validImplicitSpec = ImplicitSpecs.valid();
+
+        return celloWebTestClient.implicit().sendRequest(validImplicitSpec);
     }
 }

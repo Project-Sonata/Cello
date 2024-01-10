@@ -1,9 +1,5 @@
 package com.odeyalo.sonata.cello.web;
 
-import com.odeyalo.sonata.cello.core.ScopeContainer;
-import com.odeyalo.sonata.cello.core.SimpleScope;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentPageProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,36 +8,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
-import org.springframework.mock.web.server.MockServerWebExchange;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import testing.UriUtils;
+import testing.WithAuthenticatedResourceOwner;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
 @RegisterOauth2Clients
+@WithAuthenticatedResourceOwner
 @Import(ConsentPageEndpointTest.Config.class)
 public class ConsentPageEndpointTest {
     @Autowired
@@ -50,22 +39,14 @@ public class ConsentPageEndpointTest {
     public static final String EXISTING_CLIENT_ID = "123";
     public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
 
-    public static final String  HTML_CONTENT = "<h1>Hello Odeyalo!</h1>";
-
-    @MockBean
-    ServerSecurityContextRepository securityContextRepository;
-
+    public static final String HTML_CONTENT = "<h1>Hello Odeyalo!</h1>";
 
     String currentFlowId;
     String currentSessionId;
 
     @BeforeEach
     void prepare() {
-        prepareSecurityContextRepository();
-        System.out.println("saved sec context");
         prepareAuthorizationFlow();
-
-        System.out.println("prepared flow");
     }
 
     @Test
@@ -126,21 +107,5 @@ public class ConsentPageEndpointTest {
 
         currentFlowId = UriUtils.parseQueryParameters(uri).get("flow_id");
         currentSessionId = sessionId.getValue();
-    }
-
-    private void prepareSecurityContextRepository() {
-        SecurityContextImpl context = new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
-                .principal("odeyalo")
-                .credentials("password")
-                .resourceOwner(ResourceOwner.builder()
-                        .principal("odeyalo")
-                        .availableScopes(ScopeContainer.singleScope(
-                                SimpleScope.withName("write")
-                        ))
-                        .build())
-                .build());
-
-        when(securityContextRepository.load(any()))
-                .thenReturn(Mono.just(context));
     }
 }

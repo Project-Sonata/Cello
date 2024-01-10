@@ -74,6 +74,12 @@ class AuthorizeEndpointTest {
             assertThat(uri).isNotNull();
             assertThat(uri).hasParameter("flow_id");
         }
+    }
+
+
+    @Nested
+    @TestInstance(Lifecycle.PER_CLASS)
+    class InvalidAuthorizationRequestTest {
 
         @Test
         void shouldReturn400BadRequestIfResponseTypeNotIncluded() {

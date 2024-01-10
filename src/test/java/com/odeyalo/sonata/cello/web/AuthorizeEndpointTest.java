@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,7 +23,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import testing.spring.configuration.RegisterOauth2Clients;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -71,10 +77,34 @@ class AuthorizeEndpointTest {
         }
 
         @Test
-        void shouldReturnRedirectToConsentPage() {
+        void shouldReturnRedirectToConsentPage() throws URISyntaxException {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
-            responseSpec.expectHeader().location("/oauth2/consent");
+            HttpHeaders headers = responseSpec.returnResult(String.class).getResponseHeaders();
+
+            URI uri = headers.getLocation();
+
+            assertThat(uri).isNotNull();
+            assertThat(
+                    new URI(uri.getScheme(),
+                            uri.getAuthority(),
+                            uri.getPath(),
+                            null, // Ignore the query part of the input url
+                            uri.getFragment())
+                            .toString()
+            ).isEqualTo("/oauth2/consent");
+        }
+
+        @Test
+        void shouldReturnRedirectToConsentPageAndContainFlowId() {
+            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
+
+            HttpHeaders headers = responseSpec.returnResult(String.class).getResponseHeaders();
+
+            URI uri = headers.getLocation();
+
+            assertThat(uri).isNotNull();
+            assertThat(uri).hasParameter("flow_id");
         }
 
         @Test
@@ -161,7 +191,70 @@ class AuthorizeEndpointTest {
 
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
-    class MalformedRedirectUriRequestTest {
+    class UnauthorizedUserAuthorizeRequestTest {
 
+
+        @BeforeEach
+        void setup() {
+            when(securityContextRepository.load(any()))
+                    .thenReturn(Mono.empty());
+        }
+
+        @Test
+        void shouldReturn302Status() {
+            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
+
+            responseSpec.expectStatus().isFound();
+        }
+
+        @Test
+        void shouldRedirectToLoginPage() throws URISyntaxException {
+            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
+
+            HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+            String location = headers.getFirst(HttpHeaders.LOCATION);
+
+            assertThat(location).isNotNull();
+
+            URI uri = URI.create(location);
+
+            assertThat(
+                    new URI(uri.getScheme(),
+                            uri.getAuthority(),
+                            uri.getPath(),
+                            null, // Ignore the query part of the input url
+                            uri.getFragment())
+                            .toString()
+            ).isEqualTo("/login");
+        }
+
+        @Test
+        void redirectUriShouldContainFlowIdQueryParam() {
+            WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
+
+            HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+            String location = headers.getFirst(HttpHeaders.LOCATION);
+
+            assertThat(location).isNotNull();
+
+            URI uri = URI.create(location);
+
+            assertThat(uri).hasParameter("flow_id");
+        }
+
+        @NotNull
+        private WebTestClient.ResponseSpec sendValidAuthorizeRequest() {
+            return webTestClient.get()
+                    .uri(builder ->
+                            builder
+                                    .path("/authorize")
+                                    .queryParam(RESPONSE_TYPE, "token")
+                                    .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
+                                    .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
+                                    .queryParam(SCOPE, "read write")
+                                    .queryParam(STATE, "opaque")
+                                    .build())
+                    .exchange();
+        }
     }
 }

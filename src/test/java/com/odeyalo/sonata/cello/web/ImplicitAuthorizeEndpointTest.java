@@ -1,12 +1,9 @@
 package com.odeyalo.sonata.cello.web;
 
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
-import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.ScopeContainer;
 import com.odeyalo.sonata.cello.core.SimpleScope;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
-import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,18 +14,23 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
+import testing.UriUtils;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -45,46 +47,22 @@ public class ImplicitAuthorizeEndpointTest {
     public static final String STATE_PARAMETER_VALUE = "opaque";
     public static final String EXISTING_CLIENT_ID = "123";
     public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
+
     @Autowired
     WebTestClient webTestClient;
 
     @MockBean
-    Oauth2AuthorizationRequestRepository oauth2AuthorizationRequestRepository;
-    @MockBean
     ServerSecurityContextRepository securityContextRepository;
 
+    String currentFlowId;
+    String currentSessionId;
+
+
     @BeforeEach
-    void prepareAuthorizationRequest() {
-        when(oauth2AuthorizationRequestRepository.loadAuthorizationRequest(any()))
-                .thenReturn(Mono.just(
-                        ImplicitOauth2AuthorizationRequest.builder()
-                                .clientId(EXISTING_CLIENT_ID)
-                                .redirectUri(RedirectUri.create(ALLOWED_REDIRECT_URI))
-                                .scopes(ScopeContainer.singleScope(SimpleScope.withName("read")))
-                                .state(STATE_PARAMETER_VALUE)
-                                .build()
-                ));
+    void prepare() {
+        prepareSecurityContextRepository();
 
-
-
-    }
-
-    // Maybe leads to fragile test ???
-    @BeforeEach
-    void prepareSecurityContextRepository() {
-        when(securityContextRepository.load(any()))
-                .thenReturn(Mono.just(
-                        new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
-                                .principal("odeyalo")
-                                .credentials("password")
-                                .resourceOwner(ResourceOwner.builder()
-                                        .principal("odeyalo")
-                                        .availableScopes(ScopeContainer.singleScope(
-                                                SimpleScope.withName("write")
-                                        )).build())
-
-                                .build())
-                ));
+        prepareAuthorizationFlow();
     }
 
     @Test
@@ -167,13 +145,56 @@ public class ImplicitAuthorizeEndpointTest {
 
     @NotNull
     private WebTestClient.ResponseSpec sendValidImplicitAuthorizeRequest() {
+        LinkedMultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("action", "approved");
+        formData.add("flow_id", currentFlowId);
+
         return webTestClient.post()
+                .uri("/oauth2/consent")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .body(BodyInserters.fromFormData(formData))
+                .cookie("SESSION", currentSessionId)
+                .exchange();
+    }
+
+    private void prepareAuthorizationFlow() {
+        WebTestClient.ResponseSpec exchange = webTestClient.get()
                 .uri(builder ->
                         builder
-                                .path("/oauth2/consent")
+                                .path("/authorize")
+                                .queryParam(RESPONSE_TYPE, "token")
+                                .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
+                                .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
+                                .queryParam(SCOPE, "read write")
+                                .queryParam(STATE, "opaque")
                                 .build())
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .body(BodyInserters.fromFormData("action", "approved"))
                 .exchange();
+
+        exchange.expectStatus().isFound();
+
+        FluxExchangeResult<String> result = exchange
+                .returnResult(String.class);
+
+        URI uri = result.getResponseHeaders().getLocation();
+        ResponseCookie sessionId = result.getResponseCookies().getFirst("SESSION");
+
+        currentFlowId = UriUtils.parseQueryParameters(uri).get("flow_id");
+        currentSessionId = sessionId.getValue();
+    }
+
+    private void prepareSecurityContextRepository() {
+        SecurityContextImpl context = new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
+                .principal("odeyalo")
+                .credentials("password")
+                .resourceOwner(ResourceOwner.builder()
+                        .principal("odeyalo")
+                        .availableScopes(ScopeContainer.singleScope(
+                                SimpleScope.withName("write")
+                        ))
+                        .build())
+                .build());
+
+        when(securityContextRepository.load(any()))
+                .thenReturn(Mono.just(context));
     }
 }

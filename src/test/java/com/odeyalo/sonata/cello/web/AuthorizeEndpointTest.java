@@ -18,9 +18,8 @@ import testing.WithAuthenticatedResourceOwner;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static testing.UriAssert.assertThat;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
@@ -28,7 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @RegisterOauth2Clients
 class AuthorizeEndpointTest {
-
+    // Bean is injected using AutoconfigureCelloWebTestClient
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     CelloWebTestClient celloWebTestClient;
 
@@ -45,7 +45,7 @@ class AuthorizeEndpointTest {
         }
 
         @Test
-        void shouldReturnRedirectToConsentPage() throws URISyntaxException {
+        void shouldReturnRedirectToConsentPage() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
             HttpHeaders headers = responseSpec.returnResult(String.class).getResponseHeaders();
@@ -53,14 +53,7 @@ class AuthorizeEndpointTest {
             URI uri = headers.getLocation();
 
             assertThat(uri).isNotNull();
-            assertThat(
-                    new URI(uri.getScheme(),
-                            uri.getAuthority(),
-                            uri.getPath(),
-                            null, // Ignore the query part of the input url
-                            uri.getFragment())
-                            .toString()
-            ).isEqualTo("/oauth2/consent");
+            assertThat(uri).isEqualToWithoutQueryParameters("/oauth2/consent");
         }
 
         @Test
@@ -130,24 +123,17 @@ class AuthorizeEndpointTest {
         }
 
         @Test
-        void shouldRedirectToLoginPage() throws URISyntaxException {
+        void shouldRedirectToLoginPage() {
             WebTestClient.ResponseSpec responseSpec = sendValidAuthorizeRequest();
 
             HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+
             String location = headers.getFirst(HttpHeaders.LOCATION);
 
-            assertThat(location).isNotNull();
-
+            //noinspection DataFlowIssue
             URI uri = URI.create(location);
 
-            assertThat(
-                    new URI(uri.getScheme(),
-                            uri.getAuthority(),
-                            uri.getPath(),
-                            null, // Ignore the query part of the input url
-                            uri.getFragment())
-                            .toString()
-            ).isEqualTo("/login");
+            assertThat(uri).isEqualToWithoutQueryParameters("/login");
         }
 
         @Test
@@ -157,8 +143,7 @@ class AuthorizeEndpointTest {
             HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
             String location = headers.getFirst(HttpHeaders.LOCATION);
 
-            assertThat(location).isNotNull();
-
+            //noinspection DataFlowIssue
             URI uri = URI.create(location);
 
             assertThat(uri).hasParameter("flow_id");

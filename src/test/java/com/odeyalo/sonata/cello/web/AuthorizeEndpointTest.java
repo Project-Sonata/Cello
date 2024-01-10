@@ -1,11 +1,6 @@
 package com.odeyalo.sonata.cello.web;
 
-import com.odeyalo.sonata.cello.core.ScopeContainer;
-import com.odeyalo.sonata.cello.core.SimpleScope;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -13,14 +8,11 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
+import testing.WithAuthenticatedResourceOwner;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
@@ -28,8 +20,6 @@ import java.net.URISyntaxException;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
@@ -44,30 +34,10 @@ class AuthorizeEndpointTest {
     @Autowired
     WebTestClient webTestClient;
 
-    @MockBean
-    ServerSecurityContextRepository securityContextRepository;
-
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
+    @WithAuthenticatedResourceOwner
     class ValidRequestTest {
-
-        // Maybe leads to fragile test ???
-        @BeforeEach
-        void setUp() {
-            when(securityContextRepository.load(any()))
-                    .thenReturn(Mono.just(
-                            new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
-                                    .principal("odeyalo")
-                                    .credentials("password")
-                                    .resourceOwner(ResourceOwner.builder()
-                                            .principal("odeyalo")
-                                            .availableScopes(ScopeContainer.singleScope(
-                                                    SimpleScope.withName("write")
-                                            )).build())
-
-                                    .build())
-                    ));
-        }
 
         @Test
         void shouldReturnRedirectStatus() {
@@ -192,13 +162,6 @@ class AuthorizeEndpointTest {
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
     class UnauthorizedUserAuthorizeRequestTest {
-
-
-        @BeforeEach
-        void setup() {
-            when(securityContextRepository.load(any()))
-                    .thenReturn(Mono.empty());
-        }
 
         @Test
         void shouldReturn302Status() {

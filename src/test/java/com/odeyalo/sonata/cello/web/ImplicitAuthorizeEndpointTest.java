@@ -1,9 +1,5 @@
 package com.odeyalo.sonata.cello.web;
 
-import com.odeyalo.sonata.cello.core.ScopeContainer;
-import com.odeyalo.sonata.cello.core.SimpleScope;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,20 +7,17 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
-import reactor.core.publisher.Mono;
 import testing.UriUtils;
+import testing.WithAuthenticatedResourceOwner;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
@@ -32,8 +25,6 @@ import java.net.URISyntaxException;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for implicit response type only
@@ -43,6 +34,7 @@ import static org.mockito.Mockito.when;
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
 @RegisterOauth2Clients
+@WithAuthenticatedResourceOwner
 public class ImplicitAuthorizeEndpointTest {
     public static final String STATE_PARAMETER_VALUE = "opaque";
     public static final String EXISTING_CLIENT_ID = "123";
@@ -51,17 +43,11 @@ public class ImplicitAuthorizeEndpointTest {
     @Autowired
     WebTestClient webTestClient;
 
-    @MockBean
-    ServerSecurityContextRepository securityContextRepository;
-
     String currentFlowId;
     String currentSessionId;
 
-
     @BeforeEach
     void prepare() {
-        prepareSecurityContextRepository();
-
         prepareAuthorizationFlow();
     }
 
@@ -180,21 +166,5 @@ public class ImplicitAuthorizeEndpointTest {
 
         currentFlowId = UriUtils.parseQueryParameters(uri).get("flow_id");
         currentSessionId = sessionId.getValue();
-    }
-
-    private void prepareSecurityContextRepository() {
-        SecurityContextImpl context = new SecurityContextImpl(UsernamePasswordAuthenticatedResourceOwnerAuthentication.builder()
-                .principal("odeyalo")
-                .credentials("password")
-                .resourceOwner(ResourceOwner.builder()
-                        .principal("odeyalo")
-                        .availableScopes(ScopeContainer.singleScope(
-                                SimpleScope.withName("write")
-                        ))
-                        .build())
-                .build());
-
-        when(securityContextRepository.load(any()))
-                .thenReturn(Mono.just(context));
     }
 }

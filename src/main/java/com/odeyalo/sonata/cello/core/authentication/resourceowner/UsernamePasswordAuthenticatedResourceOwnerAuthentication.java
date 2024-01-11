@@ -9,6 +9,10 @@ public class UsernamePasswordAuthenticatedResourceOwnerAuthentication extends Au
         super(username, credentials, resourceOwner);
     }
 
+    public static UsernamePasswordAuthenticatedResourceOwnerAuthentication create(String username, String credentials, ResourceOwner resourceOwner) {
+        return new UsernamePasswordAuthenticatedResourceOwnerAuthentication(username, credentials, resourceOwner);
+    }
+
     @Override
     public String getCredentials() {
         return (String) super.getCredentials();

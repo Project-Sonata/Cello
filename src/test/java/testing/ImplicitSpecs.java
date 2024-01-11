@@ -20,7 +20,7 @@ public final class ImplicitSpecs {
                 .clientId(EXISTING_CLIENT_ID)
                 .redirectUri(ALLOWED_REDIRECT_URI)
                 .scope("read, write")
-                .state(UUID.randomUUID().toString())
+                .state("opaque")
                 .build();
     }
 

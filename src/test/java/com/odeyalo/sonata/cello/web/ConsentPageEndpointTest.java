@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -17,30 +16,34 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
-import testing.UriUtils;
-import testing.WithAuthenticatedResourceOwner;
+import testing.*;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 
-import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureWebTestClient
 @ActiveProfiles("test")
 @RegisterOauth2Clients
+@AutoconfigureCelloWebTestClient
 @WithAuthenticatedResourceOwner
 @Import(ConsentPageEndpointTest.Config.class)
 public class ConsentPageEndpointTest {
+
+    // Created in AutoconfigureCelloWebTestClient config
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    WebTestClient webTestClient;
+    CelloWebTestClient celloWebTestClient;
 
-    public static final String EXISTING_CLIENT_ID = "123";
-    public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
+    static final String HTML_CONTENT = "<h1>Hello Odeyalo!</h1>";
 
-    public static final String HTML_CONTENT = "<h1>Hello Odeyalo!</h1>";
-
+    static final String SESSION_COOKIE_NAME = "SESSION";
+    static final String FLOW_ID_QUERY_PARAM_NAME = "flow_id";
+    // Bad practice, can't run this tests in concurrency mode, tests will be unpredictable because of race conditions,
+    // I don't find any solution yet :(
     String currentFlowId;
     String currentSessionId;
 
@@ -51,20 +54,14 @@ public class ConsentPageEndpointTest {
 
     @Test
     void shouldReturn200OKStatus() {
-        WebTestClient.ResponseSpec responseSpec = webTestClient.get()
-                .uri(builder -> builder.path("/oauth2/consent").queryParam("flow_id", currentFlowId).build())
-                .cookie("SESSION", currentSessionId)
-                .exchange();
+        WebTestClient.ResponseSpec responseSpec = sendGetConsentPageRequest();
 
         responseSpec.expectStatus().isOk();
     }
 
     @Test
     void shouldReturnHtmlPage() {
-        WebTestClient.ResponseSpec responseSpec = webTestClient.get()
-                .uri(builder -> builder.path("/oauth2/consent").queryParam("flow_id", currentFlowId).build())
-                .cookie("SESSION", currentSessionId)
-                .exchange();
+        WebTestClient.ResponseSpec responseSpec = sendGetConsentPageRequest();
 
         responseSpec.expectBody(String.class).isEqualTo(HTML_CONTENT);
     }
@@ -83,29 +80,31 @@ public class ConsentPageEndpointTest {
         }
     }
 
+    private WebTestClient.ResponseSpec sendGetConsentPageRequest() {
+        return celloWebTestClient.consentPage()
+                .withFlowId(currentFlowId)
+                .authenticatedUser()
+                .withSessionId(currentSessionId)
+                .and()
+                .ready()
+                .getConsentPage();
+    }
 
     private void prepareAuthorizationFlow() {
-        WebTestClient.ResponseSpec exchange = webTestClient.get()
-                .uri(builder ->
-                        builder
-                                .path("/authorize")
-                                .queryParam(RESPONSE_TYPE, "token")
-                                .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                                .queryParam(SCOPE, "read write")
-                                .queryParam(STATE, "opaque")
-                                .build())
-                .exchange();
+        WebTestClient.ResponseSpec responseSpec = celloWebTestClient.implicit().sendRequest(ImplicitSpecs.valid());
 
-        exchange.expectStatus().isFound();
+        responseSpec.expectStatus().isFound();
 
-        FluxExchangeResult<String> result = exchange
-                .returnResult(String.class);
+        FluxExchangeResult<Void> result = responseSpec.returnResult(Void.class);
 
         URI uri = result.getResponseHeaders().getLocation();
-        ResponseCookie sessionId = result.getResponseCookies().getFirst("SESSION");
+        ResponseCookie sessionCookie = result.getResponseCookies().getFirst(SESSION_COOKIE_NAME);
 
-        currentFlowId = UriUtils.parseQueryParameters(uri).get("flow_id");
-        currentSessionId = sessionId.getValue();
+        // we need this values to send valid requests, otherwise HTTP 400 BAD Request will be returned :(
+        assertThat(uri).isNotNull();
+        assertThat(sessionCookie).isNotNull();
+
+        currentFlowId = UriUtils.parseQueryParameters(uri).get(FLOW_ID_QUERY_PARAM_NAME);
+        currentSessionId = sessionCookie.getValue();
     }
 }

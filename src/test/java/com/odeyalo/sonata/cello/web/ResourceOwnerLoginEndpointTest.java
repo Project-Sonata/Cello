@@ -17,18 +17,12 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 import testing.*;
 import testing.spring.configuration.RegisterOauth2Clients;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -42,8 +36,6 @@ import static org.mockito.Mockito.when;
 public class ResourceOwnerLoginEndpointTest {
     private static final String VALID_USERNAME = "odeyalo";
     private static final String VALID_PASSWORD = "password";
-    private static final String USERNAME_KEY = "username";
-    private static final String PASSWORD_KEY = "password";
 
     static final String SESSION_COOKIE_NAME = "SESSION";
     static final String FLOW_ID_QUERY_PARAMETER_NAME = "flow_id";
@@ -90,11 +82,7 @@ public class ResourceOwnerLoginEndpointTest {
                                         (VALID_USERNAME, VALID_PASSWORD, ResourceOwner.withPrincipalOnly(VALID_PASSWORD)))
                 );
 
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(USERNAME_KEY, VALID_USERNAME);
-        formData.add(PASSWORD_KEY, VALID_PASSWORD);
-
-        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(formData);
+        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
 
         responseSpec.expectStatus().isFound();
     }
@@ -109,11 +97,7 @@ public class ResourceOwnerLoginEndpointTest {
                                         (VALID_USERNAME, VALID_PASSWORD, ResourceOwner.withPrincipalOnly(VALID_PASSWORD)))
                 );
 
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(USERNAME_KEY, VALID_USERNAME);
-        formData.add(PASSWORD_KEY, VALID_PASSWORD);
-
-        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(formData);
+        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
 
         HttpHeaders responseHeaders = responseSpec.returnResult(String.class).getResponseHeaders();
 
@@ -132,11 +116,7 @@ public class ResourceOwnerLoginEndpointTest {
                                         (VALID_USERNAME, VALID_PASSWORD, ResourceOwner.withPrincipalOnly(VALID_PASSWORD)))
                 );
 
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(USERNAME_KEY, VALID_USERNAME);
-        formData.add(PASSWORD_KEY, VALID_PASSWORD);
-
-        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(formData);
+        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
 
         HttpHeaders responseHeaders = responseSpec.returnResult(String.class).getResponseHeaders();
 
@@ -157,22 +137,17 @@ public class ResourceOwnerLoginEndpointTest {
                                 ResourceOwnerAuthenticationException.withCustomMessage("Resource owner credentials is invalid")
                         ));
 
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(USERNAME_KEY, VALID_USERNAME);
-        formData.add(PASSWORD_KEY, VALID_PASSWORD);
-
-        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(formData);
+        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
 
         responseSpec.expectStatus().isBadRequest();
     }
 
     @NotNull
-    private WebTestClient.ResponseSpec sendLoginRequest(MultiValueMap<String, String> formData) {
-        formData.add("flow_id", currentFlowId);
-        return webTestClient.post()
-                .uri("/login")
-                .body(BodyInserters.fromFormData(formData))
-                .cookie("SESSION", currentSessionId)
-                .exchange();
+    private WebTestClient.ResponseSpec sendLoginRequest(String username, String password) {
+        return celloWebTestClient.login()
+                .sessionId(currentSessionId)
+                .flowId(currentFlowId)
+                .ready()
+                .usernamePasswordLogin(username, password);
     }
 }

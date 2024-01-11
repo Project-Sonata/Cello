@@ -24,7 +24,6 @@ import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 import java.util.Collections;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -40,8 +39,8 @@ public class ResourceOwnerLoginEndpointTest {
     private static final String INVALID_USERNAME = "invalid";
     private static final String INVALID_PASSWORD = "invalid";
 
-    static final String SESSION_COOKIE_NAME = "SESSION";
-    static final String FLOW_ID_QUERY_PARAMETER_NAME = "flow_id";
+    private static final String SESSION_COOKIE_NAME = "SESSION";
+    private static final String FLOW_ID_QUERY_PARAMETER_NAME = "flow_id";
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -61,7 +60,7 @@ public class ResourceOwnerLoginEndpointTest {
         URI uri = result.getResponseHeaders().getLocation();
         ResponseCookie sessionCookie = result.getResponseCookies().getFirst(SESSION_COOKIE_NAME);
 
-        // we need this values to send valid requests, otherwise HTTP 400 BAD Request will be returned :(
+        // we need these values to send valid requests, otherwise HTTP 400 BAD Request will be returned :(
         assertThat(uri).isNotNull();
         assertThat(sessionCookie).isNotNull();
 
@@ -95,10 +94,7 @@ public class ResourceOwnerLoginEndpointTest {
 
         URI uri = responseHeaders.getLocation();
 
-        assertThat(uri).isNotNull();
-
-        assertThat(UriUtils.parseQueryParameters(uri).get("flow_id"))
-                .isNotEmpty();
+        UriAssert.assertThat(uri).hasNotEmptyQueryParameter("flow_id");
     }
 
     @Test

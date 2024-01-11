@@ -66,7 +66,6 @@ public class ImplicitAuthorizeEndpointTest {
 
         URI locationUri = headers.getLocation();
 
-        assertThat(locationUri).isNotNull();
         assertThat(locationUri).hasParameter("access_token");
     }
 
@@ -78,7 +77,6 @@ public class ImplicitAuthorizeEndpointTest {
 
         URI locationUri = headers.getLocation();
 
-        assertThat(locationUri).isNotNull();
         assertThat(locationUri).hasParameter("token_type", "Bearer");
     }
 
@@ -90,7 +88,6 @@ public class ImplicitAuthorizeEndpointTest {
 
         URI locationUri = headers.getLocation();
 
-        assertThat(locationUri).isNotNull();
         assertThat(locationUri).hasParameter("expires_in", "3600");
     }
 
@@ -102,7 +99,6 @@ public class ImplicitAuthorizeEndpointTest {
 
         URI locationUri = headers.getLocation();
 
-        assertThat(locationUri).isNotNull();
         assertThat(locationUri).hasParameter("state", STATE_PARAMETER_VALUE);
     }
 

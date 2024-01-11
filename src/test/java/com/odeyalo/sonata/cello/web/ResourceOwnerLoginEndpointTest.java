@@ -21,6 +21,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
+import testing.AutoconfigureCelloWebTestClient;
+import testing.CelloWebTestClient;
+import testing.ImplicitSpecs;
 import testing.UriUtils;
 import testing.spring.configuration.RegisterOauth2Clients;
 
@@ -38,17 +41,22 @@ import static org.mockito.Mockito.when;
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
 @RegisterOauth2Clients
+@AutoconfigureCelloWebTestClient
 public class ResourceOwnerLoginEndpointTest {
     private static final String VALID_USERNAME = "odeyalo";
     private static final String VALID_PASSWORD = "password";
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
 
-    public static final String EXISTING_CLIENT_ID = "123";
-    public static final String EXISTING_REDIRECT_URI = "http://localhost:4000";
+    static final String SESSION_COOKIE_NAME = "SESSION";
+    static final String FLOW_ID_QUERY_PARAMETER_NAME = "flow_id";
 
     @Autowired
     WebTestClient webTestClient;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    CelloWebTestClient celloWebTestClient;
 
     @MockBean
     ResourceOwnerAuthenticationManager resourceOwnerAuthenticationManager;
@@ -56,31 +64,23 @@ public class ResourceOwnerLoginEndpointTest {
     String currentFlowId;
     String currentSessionId;
 
-
     @BeforeEach
-    void setUp() {
-        WebTestClient.ResponseSpec exchange = webTestClient.get()
-                .uri(builder ->
-                        builder
-                                .path("/authorize")
-                                .queryParam(RESPONSE_TYPE, "token")
-                                .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                                .queryParam(REDIRECT_URI, EXISTING_REDIRECT_URI)
-                                .queryParam(SCOPE, "read write")
-                                .queryParam(STATE, "opaque")
-                                .build())
-                .exchange();
+    void prepare() {
+        WebTestClient.ResponseSpec exchange = celloWebTestClient.implicit().sendRequest(ImplicitSpecs.valid());
 
         exchange.expectStatus().isFound();
 
-        FluxExchangeResult<String> result = exchange
-                .returnResult(String.class);
+        FluxExchangeResult<Void> result = exchange.returnResult(Void.class);
 
         URI uri = result.getResponseHeaders().getLocation();
-        ResponseCookie sessionId = result.getResponseCookies().getFirst("SESSION");
+        ResponseCookie sessionCookie = result.getResponseCookies().getFirst(SESSION_COOKIE_NAME);
 
-        currentFlowId = UriUtils.parseQueryParameters(uri).get("flow_id");
-        currentSessionId = sessionId.getValue();
+        // we need this values to send valid requests, otherwise HTTP 400 BAD Request will be returned :(
+        assertThat(uri).isNotNull();
+        assertThat(sessionCookie).isNotNull();
+
+        currentFlowId = UriUtils.parseQueryParameters(uri).get(FLOW_ID_QUERY_PARAMETER_NAME);
+        currentSessionId = sessionCookie.getValue();
     }
 
     @Test

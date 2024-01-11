@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -17,7 +16,6 @@ import testing.*;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,81 +46,64 @@ public class ImplicitAuthorizeEndpointTest {
     }
 
     @Test
-    void shouldRedirectToProvidedRedirectUriAsResponse() throws URISyntaxException {
+    void shouldRedirectToProvidedRedirectUriAsResponse() {
         WebTestClient.ResponseSpec responseSpec = sendValidImplicitAuthorizeRequest();
 
         responseSpec.expectStatus().isFound();
 
-        HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+        HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
 
-        assertThat(headers).containsKey(HttpHeaders.LOCATION);
+        URI locationUri = headers.getLocation();
 
-        URI uri = URI.create(headers.getFirst(HttpHeaders.LOCATION));
-
-        assertThat(
-                new URI(uri.getScheme(),
-                        uri.getAuthority(),
-                        uri.getPath(),
-                        null, // Ignore the query part of the input url
-                        uri.getFragment())
-                        .toString()
-        ).isEqualTo("http://localhost:4000");
+        UriAssert.assertThat(locationUri).isEqualToWithoutQueryParameters("http://localhost:4000");
     }
 
     @Test
     void shouldReturnAccessTokenInRedirectUri() {
         WebTestClient.ResponseSpec responseSpec = sendValidImplicitAuthorizeRequest();
 
-        HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+        HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
 
-        assertThat(headers).containsKey(HttpHeaders.LOCATION);
-
-        String locationUri = headers.getFirst(HttpHeaders.LOCATION);
+        URI locationUri = headers.getLocation();
 
         assertThat(locationUri).isNotNull();
-        assertThat(URI.create(locationUri)).hasParameter("access_token");
+        assertThat(locationUri).hasParameter("access_token");
     }
 
     @Test
     void shouldReturnAccessTokenTypeInRedirectUri() {
         WebTestClient.ResponseSpec responseSpec = sendValidImplicitAuthorizeRequest();
 
-        HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+        HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
 
-        assertThat(headers).containsKey(HttpHeaders.LOCATION);
+        URI locationUri = headers.getLocation();
 
-        String locationHeaderValue = headers.getFirst(HttpHeaders.LOCATION);
-
-        assertThat(locationHeaderValue).isNotNull();
-        assertThat(URI.create(locationHeaderValue)).hasParameter("token_type", "Bearer");
+        assertThat(locationUri).isNotNull();
+        assertThat(locationUri).hasParameter("token_type", "Bearer");
     }
 
     @Test
     void shouldReturnAccessTokenExpiresTimeInRedirectUri() {
         WebTestClient.ResponseSpec responseSpec = sendValidImplicitAuthorizeRequest();
 
-        HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+        HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
 
-        assertThat(headers).containsKey(HttpHeaders.LOCATION);
-
-        String locationUri = headers.getFirst(HttpHeaders.LOCATION);
+        URI locationUri = headers.getLocation();
 
         assertThat(locationUri).isNotNull();
-        assertThat(URI.create(locationUri)).hasParameter("expires_in", "3600");
+        assertThat(locationUri).hasParameter("expires_in", "3600");
     }
 
     @Test
     void shouldReturnStateAsProvidedInRedirectUri() {
         WebTestClient.ResponseSpec responseSpec = sendValidImplicitAuthorizeRequest();
 
-        HttpHeaders headers = responseSpec.returnResult(ResponseEntity.class).getResponseHeaders();
+        HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
 
-        assertThat(headers).containsKey(HttpHeaders.LOCATION);
-
-        String locationUri = headers.getFirst(HttpHeaders.LOCATION);
+        URI locationUri = headers.getLocation();
 
         assertThat(locationUri).isNotNull();
-        assertThat(URI.create(locationUri)).hasParameter("state", STATE_PARAMETER_VALUE);
+        assertThat(locationUri).hasParameter("state", STATE_PARAMETER_VALUE);
     }
 
     @NotNull

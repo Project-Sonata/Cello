@@ -1,39 +1,44 @@
 package com.odeyalo.sonata.cello.web;
 
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.InMemoryResourceOwnerService;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticationManager;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordAuthenticatedResourceOwnerAuthentication;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.exception.ResourceOwnerAuthenticationException;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.UsernamePasswordResourceOwnerAuthenticationManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
 import testing.*;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @RegisterOauth2Clients
 @AutoconfigureCelloWebTestClient
+@Import(ResourceOwnerLoginEndpointTest.Config.class)
 public class ResourceOwnerLoginEndpointTest {
     private static final String VALID_USERNAME = "odeyalo";
     private static final String VALID_PASSWORD = "password";
+
+    private static final String INVALID_USERNAME = "invalid";
+    private static final String INVALID_PASSWORD = "invalid";
 
     static final String SESSION_COOKIE_NAME = "SESSION";
     static final String FLOW_ID_QUERY_PARAMETER_NAME = "flow_id";
@@ -41,9 +46,6 @@ public class ResourceOwnerLoginEndpointTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     CelloWebTestClient celloWebTestClient;
-
-    @MockBean
-    ResourceOwnerAuthenticationManager resourceOwnerAuthenticationManager;
 
     String currentFlowId;
     String currentSessionId;
@@ -69,14 +71,6 @@ public class ResourceOwnerLoginEndpointTest {
 
     @Test
     void shouldReturnRedirectIfLoginSuccess() {
-
-        when(resourceOwnerAuthenticationManager.attemptAuthentication(any()))
-                .thenReturn(
-                        Mono.just(
-                                new UsernamePasswordAuthenticatedResourceOwnerAuthentication
-                                        (VALID_USERNAME, VALID_PASSWORD, ResourceOwner.withPrincipalOnly(VALID_PASSWORD)))
-                );
-
         WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
 
         responseSpec.expectStatus().isFound();
@@ -84,14 +78,6 @@ public class ResourceOwnerLoginEndpointTest {
 
     @Test
     void shouldReturnRedirectToConsentPage() {
-
-        when(resourceOwnerAuthenticationManager.attemptAuthentication(any()))
-                .thenReturn(
-                        Mono.just(
-                                new UsernamePasswordAuthenticatedResourceOwnerAuthentication
-                                        (VALID_USERNAME, VALID_PASSWORD, ResourceOwner.withPrincipalOnly(VALID_PASSWORD)))
-                );
-
         WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
 
         HttpHeaders responseHeaders = responseSpec.returnResult(String.class).getResponseHeaders();
@@ -103,14 +89,6 @@ public class ResourceOwnerLoginEndpointTest {
 
     @Test
     void shouldReturnRedirectToConsentPageWithFlowIdQueryParameter() {
-
-        when(resourceOwnerAuthenticationManager.attemptAuthentication(any()))
-                .thenReturn(
-                        Mono.just(
-                                new UsernamePasswordAuthenticatedResourceOwnerAuthentication
-                                        (VALID_USERNAME, VALID_PASSWORD, ResourceOwner.withPrincipalOnly(VALID_PASSWORD)))
-                );
-
         WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
 
         HttpHeaders responseHeaders = responseSpec.returnResult(String.class).getResponseHeaders();
@@ -125,14 +103,7 @@ public class ResourceOwnerLoginEndpointTest {
 
     @Test
     void shouldReturnBadRequestStatusIfCredentialsInvalid() {
-
-        when(resourceOwnerAuthenticationManager.attemptAuthentication(any()))
-                .thenReturn(
-                        Mono.error(
-                                ResourceOwnerAuthenticationException.withCustomMessage("Resource owner credentials is invalid")
-                        ));
-
-        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(VALID_USERNAME, VALID_PASSWORD);
+        WebTestClient.ResponseSpec responseSpec = sendLoginRequest(INVALID_USERNAME, INVALID_PASSWORD);
 
         responseSpec.expectStatus().isBadRequest();
     }
@@ -144,5 +115,24 @@ public class ResourceOwnerLoginEndpointTest {
                 .flowId(currentFlowId)
                 .ready()
                 .usernamePasswordLogin(username, password);
+    }
+
+    @TestConfiguration
+    public static class Config {
+
+        @Bean
+        @Primary
+        public ResourceOwnerAuthenticationManager testingResourceOwnerAuthenticationManager() {
+            ResourceOwner existingUser = ResourceOwner.builder()
+                    .principal(VALID_USERNAME)
+                    .credentials(VALID_PASSWORD)
+                    .build();
+
+            return new UsernamePasswordResourceOwnerAuthenticationManager(
+                    new InMemoryResourceOwnerService(
+                            Collections.singletonList(existingUser)
+                    )
+            );
+        }
     }
 }

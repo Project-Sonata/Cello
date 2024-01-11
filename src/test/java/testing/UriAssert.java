@@ -30,4 +30,10 @@ public class UriAssert extends AbstractUriAssert<UriAssert> {
             throw failure("Failed to construct URI from provided");
         }
     }
+
+    public void hasNotEmptyQueryParameter(String parameterName) {
+        String value = UriUtils.parseQueryParameters(actual).get(parameterName);
+
+        Assertions.assertThat(value).isNotEmpty();
+    }
 }

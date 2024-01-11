@@ -26,6 +26,10 @@ public final class CelloWebTestClient {
         return ConsentPageClientProps.builder(webTestClient);
     }
 
+    public LoginClientProps.LoginClientPropsBuilder login() {
+        return LoginClientProps.withWebTestClient(webTestClient);
+    }
+
     @AllArgsConstructor
     @Value
     @Builder

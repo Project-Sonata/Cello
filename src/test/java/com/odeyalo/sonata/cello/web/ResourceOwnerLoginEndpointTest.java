@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureWebTestClient
 @ActiveProfiles("test")
 @RegisterOauth2Clients
 @AutoconfigureCelloWebTestClient
@@ -39,9 +37,6 @@ public class ResourceOwnerLoginEndpointTest {
 
     static final String SESSION_COOKIE_NAME = "SESSION";
     static final String FLOW_ID_QUERY_PARAMETER_NAME = "flow_id";
-
-    @Autowired
-    WebTestClient webTestClient;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired

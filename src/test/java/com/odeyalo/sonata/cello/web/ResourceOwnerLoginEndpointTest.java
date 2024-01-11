@@ -21,10 +21,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
-import testing.AutoconfigureCelloWebTestClient;
-import testing.CelloWebTestClient;
-import testing.ImplicitSpecs;
-import testing.UriUtils;
+import testing.*;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.io.UnsupportedEncodingException;
@@ -103,7 +100,7 @@ public class ResourceOwnerLoginEndpointTest {
     }
 
     @Test
-    void shouldReturnRedirectToConsentPage() throws URISyntaxException {
+    void shouldReturnRedirectToConsentPage() {
 
         when(resourceOwnerAuthenticationManager.attemptAuthentication(any()))
                 .thenReturn(
@@ -122,20 +119,11 @@ public class ResourceOwnerLoginEndpointTest {
 
         URI uri = responseHeaders.getLocation();
 
-        assertThat(uri).isNotNull();
-
-        assertThat(
-                new URI(uri.getScheme(),
-                        uri.getAuthority(),
-                        uri.getPath(),
-                        null, // Ignore the query part of the input url
-                        uri.getFragment())
-                        .toString()
-        ).isEqualTo("/oauth2/consent");
+        UriAssert.assertThat(uri).isEqualToWithoutQueryParameters("/oauth2/consent");
     }
 
     @Test
-    void shouldReturnRedirectToConsentPageWithFlowIdQueryParameter() throws UnsupportedEncodingException {
+    void shouldReturnRedirectToConsentPageWithFlowIdQueryParameter() {
 
         when(resourceOwnerAuthenticationManager.attemptAuthentication(any()))
                 .thenReturn(

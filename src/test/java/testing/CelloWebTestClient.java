@@ -1,8 +1,7 @@
 package testing;
 
 import com.odeyalo.sonata.cello.core.DefaultOauth2ResponseTypes;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -21,6 +20,21 @@ public final class CelloWebTestClient {
 
     public ImplicitClient implicit() {
         return new ImplicitClient();
+    }
+
+    public ConsentPageClientProps.Builder consentPage() {
+        return ConsentPageClientProps.builder(webTestClient);
+    }
+
+    @AllArgsConstructor
+    @Value
+    @Builder
+    public static class AuthenticatedClientProps {
+        String sessionId;
+
+        public static AuthenticatedClientProps withSessionId(String sessionId) {
+            return builder().sessionId(sessionId).build();
+        }
     }
 
     /**
@@ -55,6 +69,28 @@ public final class CelloWebTestClient {
                                     .build())
                     .exchange();
 
+        }
+    }
+
+    public static class AuthenticatedClientBuilder<T> {
+        private String sessionId;
+        T parent;
+
+        public AuthenticatedClientBuilder(T parent) {
+            this.parent = parent;
+        }
+
+        public AuthenticatedClientBuilder<T> withSessionId(String sessionId) {
+            this.sessionId = sessionId;
+            return this;
+        }
+
+        public AuthenticatedClientProps build() {
+            return AuthenticatedClientProps.withSessionId(sessionId);
+        }
+
+        public T and() {
+            return parent;
         }
     }
 

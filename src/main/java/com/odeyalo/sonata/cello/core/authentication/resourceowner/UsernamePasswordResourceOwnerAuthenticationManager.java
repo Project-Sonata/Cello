@@ -20,8 +20,8 @@ public class UsernamePasswordResourceOwnerAuthenticationManager implements Resou
     public Mono<AuthenticatedResourceOwnerAuthentication> attemptAuthentication(@NotNull ServerWebExchange webExchange) {
         MediaType requestContentType = webExchange.getRequest().getHeaders().getContentType();
 
-        if ( !Objects.equals(requestContentType, MediaType.APPLICATION_FORM_URLENCODED) &&
-                !Objects.equals(requestContentType, MediaType.MULTIPART_FORM_DATA) ) {
+        if ( !MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(requestContentType) &&
+                !MediaType.MULTIPART_FORM_DATA.equalsTypeAndSubtype(requestContentType) ) {
             return Mono.empty();
         }
 

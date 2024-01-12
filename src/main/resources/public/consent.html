@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth2 Consent Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .permit {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .deny {
+            background-color: #FF5733;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>OAuth2 Consent Page</h2>
+    <p>You are granting access to the following scopes:</p>
+
+    <form id="oauth2ConsentForm" action="/process-consent" method="post">
+        <label>
+            <input type="checkbox" name="scope[]" value="{todo}">
+            Read Data
+        </label>
+
+        <label>
+            <input type="checkbox" name="scope[]" value="{todo}">
+            Write Data
+        </label>
+
+        <button type="submit" class="permit">Permit</button>
+        <button type="button" class="deny">Deny</button>
+    </form>
+</div>
+
+</body>
+</html>

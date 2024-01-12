@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import reactor.test.StepVerifier;
+import testing.UriAssert;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +35,7 @@ class ImplicitOauth2AuthorizationResponseConverterTest {
     }
 
     @Test
-    void shouldReturnRedirectToSameUriAsProvidedInAuthorizationRequest() throws URISyntaxException {
+    void shouldReturnRedirectToSameUriAsProvidedInAuthorizationRequest() {
         ImplicitOauth2AuthorizationResponseConverter testable = new ImplicitOauth2AuthorizationResponseConverter();
 
         // given
@@ -54,9 +54,7 @@ class ImplicitOauth2AuthorizationResponseConverterTest {
 
         URI location = httpExchange.getResponse().getHeaders().getLocation();
 
-        assertThat(location).isNotNull();
-
-        assertThat(uriWithoutQueryParams(location)).isEqualTo(URI.create("http://localhost:3000"));
+        UriAssert.assertThat(location).isEqualToWithoutQueryParameters("http://localhost:3000");
     }
 
     @Test
@@ -141,15 +139,6 @@ class ImplicitOauth2AuthorizationResponseConverterTest {
         URI location = httpExchange.getResponse().getHeaders().getLocation();
 
         assertThat(location).hasParameter("state", implicitResponse.getState());
-    }
-
-    @NotNull
-    private static URI uriWithoutQueryParams(URI location) throws URISyntaxException {
-        return new URI(location.getScheme(),
-                location.getAuthority(),
-                location.getPath(),
-                null, // Ignore the query part of the input url
-                location.getFragment());
     }
 
     @NotNull

@@ -4,6 +4,7 @@ import com.odeyalo.sonata.cello.core.MockOauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.RedirectUriProvider;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ class DelegatingOauth2ConsentSubmissionHandlerTest {
                         .body("action=approved")
         );
         // when
-        testable.handleConsentSubmission(MockOauth2AuthorizationRequest.create(), webExchange).block();
+        testable.handleConsentSubmission(MockOauth2AuthorizationRequest.create(), ResourceOwner.withPrincipalOnly("odeyalo"), webExchange).block();
         // then
         assertThat(webExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FOUND);
         assertThat(webExchange.getResponse().getHeaders().getLocation()).isEqualTo(initialExchange.getRequest().getURI());
@@ -77,7 +78,7 @@ class DelegatingOauth2ConsentSubmissionHandlerTest {
                         .body("action=denied")
         );
         // when
-        testable.handleConsentSubmission(new RedirectUriRequest(RedirectUri.create("http://localhost:3000/callback")), webExchange).block();
+        testable.handleConsentSubmission(new RedirectUriRequest(RedirectUri.create("http://localhost:3000/callback")), ResourceOwner.withPrincipalOnly("odeyalo"), webExchange).block();
         // then
         assertThat(webExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FOUND);
 

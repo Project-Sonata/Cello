@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -15,29 +16,26 @@ public class ImplicitOauth2AuthorizationResponseConverter implements Oauth2Autho
 
     @Override
     @NotNull
-    public Mono<ServerHttpResponse> convert(@NotNull Oauth2AuthorizationResponse<? extends Oauth2AuthorizationRequest> response,
+    public Mono<ServerHttpResponse> convert(@NotNull Oauth2AuthorizationResponse<? extends Oauth2AuthorizationRequest> authorizationResponse,
                                             @NotNull ServerWebExchange currentExchange) {
 
-        if ( !(response instanceof ImplicitOauth2AuthorizationResponse implicitOauth2AuthorizationResponse) ) {
+        if ( !(authorizationResponse instanceof ImplicitOauth2AuthorizationResponse implicitOauth2AuthorizationResponse) ) {
             return Mono.empty();
         }
 
         ServerHttpResponse serverHttpResponse = currentExchange.getResponse();
         ImplicitOauth2AuthorizationRequest authorizationRequest = implicitOauth2AuthorizationResponse.getAssociatedRequest();
 
-        String redirectUri = new StringBuilder(authorizationRequest.getRedirectUri().uriString()) // todo
-                .append("?access_token=")
-                .append(implicitOauth2AuthorizationResponse.getAccessToken())
-                .append("&token_type=")
-                .append(implicitOauth2AuthorizationResponse.getTokenType())
-                .append("&expires_in=")
-                .append(implicitOauth2AuthorizationResponse.getExpiresIn())
-                .append("&state=")
-                .append(implicitOauth2AuthorizationResponse.getState())
-                .toString();
+        URI redirectUri = UriComponentsBuilder.fromUri(authorizationRequest.getRedirectUri().asUri())
+                .queryParam("access_token", implicitOauth2AuthorizationResponse.getAccessToken())
+                .queryParam("token_type", implicitOauth2AuthorizationResponse.getTokenType())
+                .queryParam("expires_in", implicitOauth2AuthorizationResponse.getExpiresIn())
+                .queryParam("state", implicitOauth2AuthorizationResponse.getState())
+                .build()
+                .toUri();
 
         serverHttpResponse.setStatusCode(HttpStatus.FOUND);
-        serverHttpResponse.getHeaders().setLocation(URI.create(redirectUri));
+        serverHttpResponse.getHeaders().setLocation(redirectUri);
 
         return Mono.just(serverHttpResponse);
     }

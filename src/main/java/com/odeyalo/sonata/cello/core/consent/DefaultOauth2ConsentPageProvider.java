@@ -2,7 +2,9 @@ package com.odeyalo.sonata.cello.core.consent;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
+import com.odeyalo.sonata.cello.core.Scope;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
+import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -24,21 +26,34 @@ public final class DefaultOauth2ConsentPageProvider implements Oauth2ConsentPage
         response.getHeaders().setContentType(MediaType.TEXT_HTML);
         String flowId = httpExchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
 
-        return response.writeWith(Flux.just(response.bufferFactory().wrap(("<!DOCTYPE html>\n" +
+        return response.writeWith(
+                Flux.just(response.bufferFactory().wrap(getContent(request, resourceOwner, flowId)))
+        );
+    }
+
+    private static byte[] getContent(Oauth2AuthorizationRequest request, @NotNull ResourceOwner resourceOwner, String flowId) {
+        ImplicitOauth2AuthorizationRequest implicitOauth2AuthorizationRequest = (ImplicitOauth2AuthorizationRequest) request;
+
+        StringBuilder htmlContent = new StringBuilder("<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
                 "<head>\n" +
                 "    <meta charset=\"UTF-8\">\n" +
                 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
                 "    <title>OAuth2 Consent Page</title>\n" +
                 "    <style>\n" +
-                "        body {\n" +
-                "            font-family: Arial, sans-serif;\n" +
-                "            margin: 20px;\n" +
+                "    body {\n" +
+                "           font-family: Arial, sans-serif;\n" +
+                "           display: flex;\n" +
+                "           justify-content: center;\n" +
+                "           align-items: center;\n" +
+                "           height: 100vh;\n" +
+                "           margin: 0;\n" +
                 "        }\n" +
                 "\n" +
                 "        .container {\n" +
                 "            max-width: 600px;\n" +
-                "            margin: auto;\n" +
+                "            padding: 20px;\n" +
+                "            border: 1px solid #ccc;\n" +
                 "        }\n" +
                 "\n" +
                 "        h2 {\n" +
@@ -82,25 +97,38 @@ public final class DefaultOauth2ConsentPageProvider implements Oauth2ConsentPage
                 "    <p>You are granting access to the following scopes:</p>\n" +
                 "\n" +
                 "    <form id=\"oauth2ConsentForm\" action=\"/oauth2/consent\" method=\"post\">\n" +
-                "<input type=\"hidden\" name=\"flow_id\" value=\"" +  flowId + "\">" +
-                "        <label>\n" +
-                "            <input type=\"checkbox\" name=\"scope[]\" value=\"read_data\" required>\n" +
-                "            Read Data\n" +
-                "        </label>\n" +
-                "\n" +
-                "        <label>\n" +
-                "            <input type=\"checkbox\" name=\"scope[]\" value=\"write_data\" required>\n" +
-                "            Write Data\n" +
-                "        </label>\n" +
-                "\n" +
-                "        <button type=\"submit\" class=\"permit\" name=\"action\" value=\"approved\">Permit</button>\n" +
-                "        <button type=\"submit\" class=\"deny\" name=\"action\" value=\"denied\">Deny</button>\n" +
-                "    </form>\n" +
-                "</div>\n" +
-                "\n" +
-                "</body>\n" +
-                "</html>\n").getBytes())));
+                "<input type=\"hidden\" name=\"flow_id\" value=\"" + flowId + "\">");
 
+        for (Scope scope : implicitOauth2AuthorizationRequest.getScopes()) {
+            htmlContent.append("<label>\n")
+                    .append("<input type=\"checkbox\" name=\"approved_scope\" value=\"")
+                    .append(scope.getName())
+                    .append("\">")
+                    .append(scope.getName())
+                    .append("</label>\n");
+        }
 
+        htmlContent.append(
+                        """
+                                        <button type="submit" class="permit" name="action" value="approved">Permit</button>
+                                        <button type="submit" class="deny" name="action" value="denied">Deny</button>
+                                    </form>
+                                """)
+                .append("""
+                         <div class="account">
+                         <label>You are logged in as </label>
+                        """
+                )
+                .append(resourceOwner.getPrincipal())
+                .append("</div>")
+                .append("</div>")
+                .append(
+                        """
+                                               </body>
+                                               </html>
+                                """
+                );
+
+        return htmlContent.toString().getBytes();
     }
 }

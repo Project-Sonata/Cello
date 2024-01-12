@@ -4,19 +4,16 @@ import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.RedirectUriProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import lombok.Value;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
-import reactor.test.StepVerifier;
+import testing.UriAssert;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class DefaultOauth2ConsentDeniedHandlerTest {
 
@@ -38,7 +35,7 @@ class DefaultOauth2ConsentDeniedHandlerTest {
     }
 
     @Test
-    void shouldReturnRedirectToProvidedRedirectUriInAuthorizationRequest() throws URISyntaxException {
+    void shouldReturnRedirectToProvidedRedirectUriInAuthorizationRequest() {
         var testable = new DefaultOauth2ConsentDeniedHandler();
         // given
         var webExchange = MockServerWebExchange.from(
@@ -53,13 +50,7 @@ class DefaultOauth2ConsentDeniedHandlerTest {
         // then
         URI redirectLocation = webExchange.getResponse().getHeaders().getLocation();
 
-        assertThat(new URI(redirectLocation.getScheme(),
-                redirectLocation.getAuthority(),
-                redirectLocation.getPath(),
-                null, // Ignore the query part of the input url
-                redirectLocation.getFragment())
-                .toString()
-        ).isEqualTo("http://localhost:3000/callback");
+        UriAssert.assertThat(redirectLocation).isEqualToWithoutQueryParameters("http://localhost:3000/callback");
     }
 
     @Test

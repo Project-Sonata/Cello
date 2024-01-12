@@ -3,6 +3,7 @@ package com.odeyalo.sonata.cello.core.consent;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.RedirectUriProvider;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.web.server.DefaultServerRedirectStrategy;
@@ -31,6 +32,7 @@ public final class DefaultOauth2ConsentDeniedHandler implements Oauth2ConsentDen
     @Override
     @NotNull
     public Mono<Void> onConsentDenied(@NotNull Oauth2AuthorizationRequest request,
+                                      @NotNull ResourceOwner resourceOwner,
                                       @NotNull ConsentDecision decision,
                                       @NotNull ServerWebExchange httpExchange) {
 

@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.core.consent;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -32,7 +33,7 @@ class RequestCacheRedirectingOauth2ConsentApprovedHandlerTest {
                         .build()
         );
 
-        testable.onConsentApproved(new MockAuthorizationRequest(), new ApprovedConsentDecision(), webExchange).block();
+        testable.onConsentApproved(new MockAuthorizationRequest(), ResourceOwner.withPrincipalOnly("odeyalo"), new ApprovedConsentDecision(), webExchange).block();
 
         assertThat(webExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FOUND);
     }
@@ -58,7 +59,7 @@ class RequestCacheRedirectingOauth2ConsentApprovedHandlerTest {
                         .build()
         );
 
-        testable.onConsentApproved(new MockAuthorizationRequest(), new ApprovedConsentDecision(), webExchange).block();
+        testable.onConsentApproved(new MockAuthorizationRequest(), ResourceOwner.withPrincipalOnly("odeyalo"), new ApprovedConsentDecision(), webExchange).block();
 
         assertThat(webExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FOUND);
     }

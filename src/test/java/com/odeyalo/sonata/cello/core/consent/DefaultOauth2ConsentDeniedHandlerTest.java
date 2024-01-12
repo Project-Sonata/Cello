@@ -3,6 +3,7 @@ package com.odeyalo.sonata.cello.core.consent;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.RedirectUriProvider;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import lombok.Value;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class DefaultOauth2ConsentDeniedHandlerTest {
                 RedirectUri.create("http://localhost:3000/callback")
         );
         // when
-        testable.onConsentDenied(authorizationRequest, new DeniedConsentDecision(), webExchange).block();
+        testable.onConsentDenied(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"), new DeniedConsentDecision(), webExchange).block();
         // then
         assertThat(webExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FOUND);
     }
@@ -48,7 +49,7 @@ class DefaultOauth2ConsentDeniedHandlerTest {
                 RedirectUri.create("http://localhost:3000/callback")
         );
         // when
-        testable.onConsentDenied(authorizationRequest, new DeniedConsentDecision(), webExchange).block();
+        testable.onConsentDenied(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"), new DeniedConsentDecision(), webExchange).block();
         // then
         URI redirectLocation = webExchange.getResponse().getHeaders().getLocation();
 
@@ -62,7 +63,7 @@ class DefaultOauth2ConsentDeniedHandlerTest {
     }
 
     @Test
-    void shouldReturnAccessDeniedErrorInUriParams() throws URISyntaxException {
+    void shouldReturnAccessDeniedErrorInUriParams() {
         var testable = new DefaultOauth2ConsentDeniedHandler();
         // given
         var webExchange = MockServerWebExchange.from(
@@ -73,7 +74,7 @@ class DefaultOauth2ConsentDeniedHandlerTest {
                 RedirectUri.create("http://localhost:3000/callback")
         );
         // when
-        testable.onConsentDenied(authorizationRequest, new DeniedConsentDecision(), webExchange).block();
+        testable.onConsentDenied(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"), new DeniedConsentDecision(), webExchange).block();
         // then
         URI redirectLocation = webExchange.getResponse().getHeaders().getLocation();
 

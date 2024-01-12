@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.core.consent;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.web.server.DefaultServerRedirectStrategy;
 import org.springframework.security.web.server.ServerRedirectStrategy;
@@ -22,6 +23,7 @@ public class RequestCacheRedirectingOauth2ConsentApprovedHandler implements Oaut
     @Override
     @NotNull
     public Mono<Void> onConsentApproved(@NotNull Oauth2AuthorizationRequest currentRequest,
+                                        @NotNull ResourceOwner resourceOwner,
                                         @NotNull ConsentDecision consentDecision,
                                         @NotNull ServerWebExchange exchange) {
 

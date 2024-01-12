@@ -32,7 +32,7 @@ public class DelegatingOauth2ConsentSubmissionHandler implements Oauth2ConsentSu
         return consentDecisionResolver.resolveConsentDecision(exchange)
                 .flatMap(consentDecision -> {
                     if ( consentDecision.decision() == ConsentDecision.Decision.APPROVED ) {
-                        return approvedHandler.onConsentApproved(oauth2AuthorizationRequest, consentDecision, exchange);
+                        return approvedHandler.onConsentApproved(oauth2AuthorizationRequest, resourceOwner, consentDecision, exchange);
                     }
                     return oauth2ConsentDeniedHandler.onConsentDenied(oauth2AuthorizationRequest, consentDecision, exchange);
                 });

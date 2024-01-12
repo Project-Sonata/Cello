@@ -26,10 +26,11 @@ public class ResponseTypeHandlerOauth2ConsentApprovedHandler implements Oauth2Co
     @Override
     @NotNull
     public Mono<Void> onConsentApproved(@NotNull Oauth2AuthorizationRequest authorizationRequest,
+                                        @NotNull ResourceOwner resourceOwner,
                                         @NotNull ConsentDecision consentDecision,
                                         @NotNull ServerWebExchange exchange) {
 
-        return oauth2ResponseTypeHandler.permissionGranted(authorizationRequest, ResourceOwner.withPrincipalOnly("odeyalo"))
+        return oauth2ResponseTypeHandler.permissionGranted(authorizationRequest, resourceOwner)
                 .flatMap(response -> oauth2AuthorizationResponseConverter.convert(response, exchange))
                 .then();
     }

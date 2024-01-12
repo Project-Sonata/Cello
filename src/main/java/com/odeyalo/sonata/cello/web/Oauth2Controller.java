@@ -3,6 +3,7 @@ package com.odeyalo.sonata.cello.web;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
+import com.odeyalo.sonata.cello.core.authentication.resourceowner.AuthenticatedResourceOwnerAuthentication;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentPageProvider;
@@ -75,7 +76,8 @@ public class Oauth2Controller {
     }
 
     @PostMapping("/oauth2/consent")
-    public Mono<Void> handleConsentSubmission(Oauth2AuthorizationRequest oauth2AuthorizationRequest, ServerWebExchange webExchange) {
-        return oauth2ConsentSubmissionHandler.handleConsentSubmission(oauth2AuthorizationRequest, webExchange);
+    public Mono<Void> handleConsentSubmission(Oauth2AuthorizationRequest oauth2AuthorizationRequest, AuthenticatedResourceOwnerAuthentication authentication, ServerWebExchange webExchange) {
+        ResourceOwner resourceOwner = authentication.getResourceOwner();
+        return oauth2ConsentSubmissionHandler.handleConsentSubmission(oauth2AuthorizationRequest, resourceOwner, webExchange);
     }
 }

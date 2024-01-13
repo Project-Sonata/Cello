@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.spring.configuration;
 
 import com.odeyalo.sonata.cello.spring.configuration.security.CelloServerWebExchangeMatcher;
+import com.odeyalo.sonata.cello.web.CelloOauth2ServerEndpointsSpec;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,7 +15,7 @@ class CelloServerWebExchangeMatcherTest {
 
     @Test
     void shouldReturnTrueIfUriStartsWithOauth2() {
-        CelloServerWebExchangeMatcher testable = new CelloServerWebExchangeMatcher();
+        CelloServerWebExchangeMatcher testable = new CelloServerWebExchangeMatcher(CelloOauth2ServerEndpointsSpec.defaultSpec());
         MockServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/oauth2/authorize").build()
         );
@@ -29,7 +30,7 @@ class CelloServerWebExchangeMatcherTest {
             "/hello", "/oauth/hello", "/miku"
     })
     void shouldReturnFalseIfUriStartsWithOauth2(String uri) {
-        CelloServerWebExchangeMatcher testable = new CelloServerWebExchangeMatcher();
+        CelloServerWebExchangeMatcher testable = new CelloServerWebExchangeMatcher(CelloOauth2ServerEndpointsSpec.defaultSpec());
         MockServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get(uri).build()
         );

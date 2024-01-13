@@ -24,6 +24,17 @@ public class ImplicitOauth2AuthorizationResponseConverter implements Oauth2Autho
         }
 
         ServerHttpResponse serverHttpResponse = currentExchange.getResponse();
+
+        URI redirectUri = buildRedirectUri(implicitOauth2AuthorizationResponse);
+
+        serverHttpResponse.setStatusCode(HttpStatus.FOUND);
+        serverHttpResponse.getHeaders().setLocation(redirectUri);
+
+        return Mono.just(serverHttpResponse);
+    }
+
+    @NotNull
+    private static URI buildRedirectUri(ImplicitOauth2AuthorizationResponse implicitOauth2AuthorizationResponse) {
         ImplicitOauth2AuthorizationRequest authorizationRequest = implicitOauth2AuthorizationResponse.getAssociatedRequest();
 
         UriComponentsBuilder redirectUriBuilder = UriComponentsBuilder.fromUri(authorizationRequest.getRedirectUri().asUri())
@@ -38,15 +49,10 @@ public class ImplicitOauth2AuthorizationResponseConverter implements Oauth2Autho
 
             redirectUriBuilder.queryParam("scope", responseScopes);
         }
-
-        URI redirectUri = redirectUriBuilder.build().toUri();
-
-        serverHttpResponse.setStatusCode(HttpStatus.FOUND);
-        serverHttpResponse.getHeaders().setLocation(redirectUri);
-
-        return Mono.just(serverHttpResponse);
+        return redirectUriBuilder.build().toUri();
     }
 
+    @NotNull
     private static String createScopes(@NotNull ScopeContainer scopes) {
         return scopes
                 .stream()

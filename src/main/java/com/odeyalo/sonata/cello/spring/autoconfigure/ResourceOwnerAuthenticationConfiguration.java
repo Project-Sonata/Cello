@@ -54,8 +54,8 @@ public class ResourceOwnerAuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler() {
-        return new ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler();
+    public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler(CelloOauth2ServerEndpointsSpec endpointsSpec) {
+        return new ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler(endpointsSpec);
     }
   
     @Bean

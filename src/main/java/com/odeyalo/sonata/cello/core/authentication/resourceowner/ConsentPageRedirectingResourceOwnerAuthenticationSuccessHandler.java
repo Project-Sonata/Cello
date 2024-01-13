@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.core.authentication.resourceowner;
 
+import com.odeyalo.sonata.cello.web.CelloOauth2ServerEndpointsSpec;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.web.server.DefaultServerRedirectStrategy;
 import org.springframework.security.web.server.ServerRedirectStrategy;
@@ -13,8 +14,12 @@ import java.net.URI;
  * Redirect to consent page after successful resource owner authentication
  */
 public class ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler implements ResourceOwnerAuthenticationSuccessHandler {
-    private final static URI CONSENT_PAGE_URI = URI.create("/oauth2/consent");
+    private final URI consentPageUri;
     private final ServerRedirectStrategy redirectStrategy = new DefaultServerRedirectStrategy();
+
+    public ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler(CelloOauth2ServerEndpointsSpec endpointsSpec) {
+        consentPageUri = URI.create(endpointsSpec.getConsentEndpoint());
+    }
 
     @Override
     @NotNull
@@ -23,7 +28,7 @@ public class ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler imp
 
         String flowId = exchange.getAttribute("flow_id");
 
-        URI redirectLocation = UriComponentsBuilder.fromUri(CONSENT_PAGE_URI)
+        URI redirectLocation = UriComponentsBuilder.fromUri(consentPageUri)
                 .queryParam("flow_id", flowId)
                 .build()
                 .toUri();

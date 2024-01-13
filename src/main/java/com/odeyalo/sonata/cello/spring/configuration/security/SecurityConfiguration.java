@@ -60,7 +60,7 @@ public class SecurityConfiguration {
                 .exceptionHandling(exceptionHandlingSpecConfigurer)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange(authorizeExchangeSpecConfigurer)
-                .securityMatcher(new CelloServerWebExchangeMatcher());
+                .securityMatcher(new CelloServerWebExchangeMatcher(endpointsSpec));
 
         oauth2SecurityCustomizer.customize(serverHttpSecurity);
 

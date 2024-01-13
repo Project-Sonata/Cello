@@ -27,6 +27,9 @@ public final class CelloOauth2ServerEndpointsSpec {
     @Builder.Default
     String consentEndpoint = "/consent";
 
+
+    private static final String SLASH = "/";
+
     public static CelloOauth2ServerEndpointsSpec defaultSpec() {
         return builder()
                 .prefix("/oauth2")
@@ -44,31 +47,41 @@ public final class CelloOauth2ServerEndpointsSpec {
     }
 
     private void setPrefix(@NotNull String prefix) {
-        if ( !StringUtils.endsWith(prefix, "/") ) {
-            prefix += "/";
+        if ( !StringUtils.startsWith(prefix, SLASH) ) {
+            prefix = StringUtils.join(SLASH, prefix);
+        }
+        if ( !StringUtils.endsWith(prefix, SLASH) ) {
+            prefix = StringUtils.join(prefix, SLASH);
         }
         this.prefix = prefix;
     }
 
     private void setAuthorizeEndpoint(@NotNull String authorizeEndpoint) {
-        authorizeEndpoint = maybeStripSlash(authorizeEndpoint);
-        this.authorizeEndpoint = prefix + authorizeEndpoint;
+        this.authorizeEndpoint = StringUtils.join(
+                prefix,
+                maybeStripSlash(authorizeEndpoint)
+        );
     }
 
 
     private void setLoginEndpoint(@NotNull String loginEndpoint) {
-        loginEndpoint = maybeStripSlash(loginEndpoint);
-        this.loginEndpoint = loginEndpoint;
+        this.loginEndpoint = StringUtils.join(
+                prefix,
+                maybeStripSlash(loginEndpoint)
+        );
     }
 
     private void setConsentEndpoint(@NotNull String consentEndpoint) {
-        consentEndpoint = maybeStripSlash(consentEndpoint);
-        this.consentEndpoint = consentEndpoint;
+        this.consentEndpoint = StringUtils.join(
+                prefix,
+                maybeStripSlash(consentEndpoint)
+        );
     }
+
 
     @NotNull
     private static String maybeStripSlash(@NotNull String uri) {
-        if ( StringUtils.startsWith(uri, "/") ) {
+        if ( StringUtils.startsWith(uri, SLASH) ) {
             return uri.substring(1);
         }
         return uri;

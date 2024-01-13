@@ -9,8 +9,11 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import reactor.test.StepVerifier;
 import testing.UriAssert;
+import testing.UriUtils;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -141,6 +144,33 @@ class ImplicitOauth2AuthorizationResponseConverterTest {
         assertThat(location).hasParameter("state", implicitResponse.getState());
     }
 
+    // Implements https://github.com/Project-Sonata/Cello/issues/44
+    @Test
+    void shouldReturnRedirectWithScopesIfTheyAreDifferFromRequested() {
+        ImplicitOauth2AuthorizationResponseConverter testable = new ImplicitOauth2AuthorizationResponseConverter();
+
+        // given
+        MockServerWebExchange httpExchange = MockServerWebExchange.from(MockServerHttpRequest.get("/authorize").build());
+        ImplicitOauth2AuthorizationRequest implicitRequest = createImplicitRequest();
+        ImplicitOauth2AuthorizationResponse implicitResponse = createImplicitResponseWithDifferentScopes(implicitRequest);
+
+        // when
+        testable.convert(implicitResponse, httpExchange)
+                .as(StepVerifier::create)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        // then
+        URI location = httpExchange.getResponse().getHeaders().getLocation();
+
+        assertThat(location).hasParameter("scope");
+
+        ScopeContainer responseScopeContainer = parseScopes(location);
+
+        assertThat(responseScopeContainer).containsAll(implicitResponse.getScope());
+
+    }
+
     @NotNull
     private static ImplicitOauth2AuthorizationResponse createImplicitResponse(ImplicitOauth2AuthorizationRequest implicitRequest) {
         return ImplicitOauth2AuthorizationResponse.withAssociatedRequest(implicitRequest)
@@ -152,6 +182,16 @@ class ImplicitOauth2AuthorizationResponseConverterTest {
                 .build();
     }
 
+    @NotNull
+    private static ImplicitOauth2AuthorizationResponse createImplicitResponseWithDifferentScopes(ImplicitOauth2AuthorizationRequest implicitRequest) {
+        return ImplicitOauth2AuthorizationResponse.withAssociatedRequest(implicitRequest)
+                .scope(ScopeContainer.fromArray(SimpleScope.withName("read"), SimpleScope.withName("custom")))
+                .tokenType(Oauth2AccessToken.TokenType.BEARER.typeName())
+                .expiresIn(3600L)
+                .accessToken("access_token_value")
+                .state(implicitRequest.getState())
+                .build();
+    }
 
     @NotNull
     private static ImplicitOauth2AuthorizationRequest createImplicitRequest() {
@@ -161,5 +201,16 @@ class ImplicitOauth2AuthorizationResponseConverterTest {
                 .state("hello")
                 .redirectUri(RedirectUri.create("http://localhost:3000"))
                 .build();
+    }
+
+    @NotNull
+    private static ScopeContainer parseScopes(URI location) {
+        String scopes = UriUtils.parseQueryParameters(location).get("scope");
+
+        List<SimpleScope> parsedScopes = Arrays.stream(scopes.split(" "))
+                .map(SimpleScope::withName)
+                .toList();
+
+        return ScopeContainer.fromCollection(parsedScopes);
     }
 }

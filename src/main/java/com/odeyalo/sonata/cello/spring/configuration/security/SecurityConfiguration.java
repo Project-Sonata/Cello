@@ -1,4 +1,4 @@
-package com.odeyalo.sonata.cello.spring.configuration;
+package com.odeyalo.sonata.cello.spring.configuration.security;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestConverter;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
@@ -14,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -39,6 +41,7 @@ public class SecurityConfiguration {
     CelloOauth2SecurityCustomizer oauth2SecurityCustomizer;
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity,
                                                          ServerSecurityContextRepository securityContextRepository,
                                                          Oauth2AuthorizationRequestConverter oauth2AuthorizationRequestConverter,
@@ -54,7 +57,8 @@ public class SecurityConfiguration {
                 .addFilterAt(new AuthenticationLoaderFilter(securityContextRepository), SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling(exceptionHandlingSpecConfigurer)
                 .securityContextRepository(securityContextRepository)
-                .authorizeExchange(authorizeExchangeSpecConfigurer);
+                .authorizeExchange(authorizeExchangeSpecConfigurer)
+                .securityMatcher(new CelloServerWebExchangeMatcher());
 
         oauth2SecurityCustomizer.customize(serverHttpSecurity);
 

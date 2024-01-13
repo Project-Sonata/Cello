@@ -28,6 +28,7 @@ public class ExceptionHandlerController implements ErrorWebExceptionHandler {
     @Override
     @NotNull
     public Mono<Void> handle(@NotNull ServerWebExchange exchange, @NotNull Throwable ex) {
+        ex.printStackTrace();
         return Flux.fromIterable(exceptionHandlers)
                 .filterWhen(strategy -> strategy.supports(ex))
                 .flatMap(strategy -> strategy.handle(exchange, ex))

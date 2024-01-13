@@ -133,7 +133,7 @@ class AuthorizeEndpointTest {
             //noinspection DataFlowIssue
             URI uri = URI.create(location);
 
-            assertThat(uri).isEqualToWithoutQueryParameters("/login");
+            assertThat(uri).isEqualToWithoutQueryParameters("/oauth2/login");
         }
 
         @Test

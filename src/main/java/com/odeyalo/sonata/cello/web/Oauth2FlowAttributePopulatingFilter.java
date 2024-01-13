@@ -26,7 +26,7 @@ public class Oauth2FlowAttributePopulatingFilter implements WebFilter {
 
         RequestPath path = exchange.getRequest().getPath();
 
-        if ( Objects.equals(path.pathWithinApplication().toString(), "/authorize") ) {
+        if ( Objects.equals(path.pathWithinApplication().toString(), "/oauth2/authorize") ) {
             // Staring the oauth2 flow, generate the flow id and continue to execute chain
             exchange.getAttributes().put(CURRENT_FLOW_ATTRIBUTE_NAME, UUID.randomUUID().toString());
             return chain.filter(exchange);

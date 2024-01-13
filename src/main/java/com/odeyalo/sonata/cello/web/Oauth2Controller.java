@@ -15,6 +15,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.util.logging.Level;
 
 @Controller
+@RequestMapping("/oauth2")
 public class Oauth2Controller {
 
     private final ResourceOwnerAuthenticator resourceOwnerAuthenticationManager;
@@ -69,13 +71,13 @@ public class Oauth2Controller {
                 .log("Cello-Oauth2-Resource-Owner-Auth", Level.FINE);
     }
 
-    @GetMapping("/oauth2/consent")
+    @GetMapping("/consent")
     public Mono<Void> getConsentPage(Oauth2AuthorizationRequest request, ServerWebExchange exchange) {
 
         return oauth2ConsentPageProvider.getConsentPage(request, ResourceOwner.withPrincipalOnly("odeyalo"), exchange);
     }
 
-    @PostMapping("/oauth2/consent")
+    @PostMapping("/consent")
     public Mono<Void> handleConsentSubmission(Oauth2AuthorizationRequest oauth2AuthorizationRequest, AuthenticatedResourceOwnerAuthentication authentication, ServerWebExchange webExchange) {
         ResourceOwner resourceOwner = authentication.getResourceOwner();
         return oauth2ConsentSubmissionHandler.handleConsentSubmission(oauth2AuthorizationRequest, resourceOwner, webExchange);

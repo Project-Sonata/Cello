@@ -94,7 +94,7 @@ public class DefaultAuthenticationPageProvider implements AuthenticationPageProv
                 "\n" +
                 "<div class=\"login-container\">\n" +
                 "    <h2>Login</h2>\n" +
-                "    <form class=\"login-form\" action=\"/login\" method=\"post\">\n" +
+                "    <form class=\"login-form\" action=\"/oauth2/login\" method=\"post\">\n" +
                 "<input type=\"hidden\" name=\"flow_id\" value=\"" + flowId + "\">" +
                 "        <div class=\"form-group\">\n" +
                 "            <label for=\"username\">Username:</label>\n" +

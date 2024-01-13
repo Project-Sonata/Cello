@@ -8,7 +8,7 @@ public class CelloAuthorizeExchangeConfigurer implements Customizer<ServerHttpSe
     @Override
     public void customize(ServerHttpSecurity.AuthorizeExchangeSpec authorizeExchangeSpec) {
         authorizeExchangeSpec
-                .pathMatchers("/login").permitAll()
+                .pathMatchers("/oauth2/login").permitAll()
                 .anyExchange().authenticated();
     }
 }

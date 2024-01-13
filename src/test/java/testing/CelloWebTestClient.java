@@ -50,7 +50,7 @@ public final class CelloWebTestClient {
             return webTestClient.get()
                     .uri(builder ->
                             builder
-                                    .path("/authorize")
+                                    .path("/oauth2/authorize")
                                     .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.IMPLICIT.getName())
                                     .queryParam(CLIENT_ID, requestBody.getClientId())
                                     .queryParam(REDIRECT_URI, requestBody.getRedirectUri())
@@ -65,7 +65,7 @@ public final class CelloWebTestClient {
             return webTestClient.get()
                     .uri(builder ->
                             builder
-                                    .path("/authorize")
+                                    .path("/oauth2/authorize")
                                     .queryParam(CLIENT_ID, requestBody.getClientId())
                                     .queryParam(REDIRECT_URI, requestBody.getRedirectUri())
                                     .queryParam(SCOPE, requestBody.getScope())

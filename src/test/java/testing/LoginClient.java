@@ -15,7 +15,7 @@ public final class LoginClient {
 
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
-    private static final String LOGIN_ENDPOINT_URI = "/login";
+    private static final String LOGIN_ENDPOINT_URI = "/oauth2/login";
     private static final String FLOW_ID_PARAM = "flow_id";
     private static final String SESSION_COOKIE_NAME = "SESSION";
 

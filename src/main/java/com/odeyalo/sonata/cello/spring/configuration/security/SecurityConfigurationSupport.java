@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 /**
- * Support configuration to create bean that can be created in {@link com.odeyalo.sonata.cello.spring.configuration.SecurityConfiguration} because they are in creation
+ * Support configuration to create bean that can be created in {@link SecurityConfiguration} because they are in creation
  */
 @Configuration
 public class SecurityConfigurationSupport {
@@ -34,7 +34,7 @@ public class SecurityConfigurationSupport {
             if ( flowId == null ) {
                 return Mono.error(new IllegalStateException("Flow id is required by standard!"));
             }
-            return serverRedirectStrategy.sendRedirect(exchange, URI.create("/login?flow_id=" + flowId));
+            return serverRedirectStrategy.sendRedirect(exchange, URI.create("/oauth2/login?flow_id=" + flowId));
         }
     }
 }

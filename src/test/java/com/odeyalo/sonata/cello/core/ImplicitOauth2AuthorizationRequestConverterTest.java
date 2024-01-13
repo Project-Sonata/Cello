@@ -2,6 +2,7 @@ package com.odeyalo.sonata.cello.core;
 
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequestConverter;
+import com.odeyalo.sonata.cello.exception.MalformedOauth2RequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -174,7 +175,7 @@ class ImplicitOauth2AuthorizationRequestConverterTest {
     }
 
     @Test
-    void shouldReturnNullRedirectUriIfNotProvided() {
+    void shouldReturnErrorIfNullRedirectUriWasNotProvided() {
         ImplicitOauth2AuthorizationRequestConverter testable = new ImplicitOauth2AuthorizationRequestConverter();
 
         var exchange = MockServerWebExchange.from(
@@ -189,11 +190,8 @@ class ImplicitOauth2AuthorizationRequestConverterTest {
 
         testable.convert(exchange)
                 .as(StepVerifier::create)
-                .expectNextMatches(request -> {
-                    ImplicitOauth2AuthorizationRequest implicitRequest = (ImplicitOauth2AuthorizationRequest) request;
-                    return Objects.isNull(implicitRequest.getRedirectUri());
-                })
-                .verifyComplete();
+                .expectError(MalformedOauth2RequestException.class)
+                .verify();
     }
 
     @Test
@@ -206,6 +204,7 @@ class ImplicitOauth2AuthorizationRequestConverterTest {
                         .queryParam("response_type", "token")
                         .queryParam("client_id", "mikuloverid")
                         .queryParam("state", "mystate")
+                        .queryParam("redirect_uri", "http://localhost:8080/oauth2/cello/callback")
                         .queryParam("scope", "write read delete")
                         .build()
         );

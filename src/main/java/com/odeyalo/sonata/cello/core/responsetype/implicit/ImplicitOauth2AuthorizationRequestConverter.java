@@ -51,9 +51,13 @@ public class ImplicitOauth2AuthorizationRequestConverter implements Oauth2Author
 
         String redirectUri = requestParameters.getFirst(Oauth2RequestParameters.REDIRECT_URI);
 
-        if ( redirectUri != null ) {
-            builder.redirectUri(RedirectUri.create(redirectUri));
+        if ( redirectUri == null ) {
+            return Mono.error(
+                    MalformedOauth2RequestException.withCustomMessage("Missed redirect_uri parameter")
+            );
         }
+
+        builder.redirectUri(RedirectUri.create(redirectUri));
 
         String scopesStr = requestParameters.getFirst(Oauth2RequestParameters.SCOPE);
 

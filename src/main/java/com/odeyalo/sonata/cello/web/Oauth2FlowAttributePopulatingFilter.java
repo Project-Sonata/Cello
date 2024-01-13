@@ -18,6 +18,11 @@ import static com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository
  * Populate the {@link ServerWebExchange} attributes with the flow ID
  */
 public class Oauth2FlowAttributePopulatingFilter implements WebFilter {
+    private final CelloOauth2ServerEndpointsSpec endpointsSpec;
+
+    public Oauth2FlowAttributePopulatingFilter(CelloOauth2ServerEndpointsSpec endpointsSpec) {
+        this.endpointsSpec = endpointsSpec;
+    }
 
     @Override
     @NotNull
@@ -26,7 +31,7 @@ public class Oauth2FlowAttributePopulatingFilter implements WebFilter {
 
         RequestPath path = exchange.getRequest().getPath();
 
-        if ( Objects.equals(path.pathWithinApplication().toString(), "/oauth2/authorize") ) {
+        if ( Objects.equals(path.pathWithinApplication().toString(), endpointsSpec.getAuthorizeEndpoint()) ) {
             // Staring the oauth2 flow, generate the flow id and continue to execute chain
             exchange.getAttributes().put(CURRENT_FLOW_ATTRIBUTE_NAME, UUID.randomUUID().toString());
             return chain.filter(exchange);

@@ -3,6 +3,7 @@ package com.odeyalo.sonata.cello.spring.autoconfigure;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
 import com.odeyalo.sonata.cello.core.authentication.DefaultAuthenticationPageProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.*;
+import com.odeyalo.sonata.cello.web.CelloOauth2ServerEndpointsSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -53,13 +54,13 @@ public class ResourceOwnerAuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler() {
-        return new ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler();
+    public ResourceOwnerAuthenticationSuccessHandler resourceOwnerAuthenticationSuccessHandler(CelloOauth2ServerEndpointsSpec endpointsSpec) {
+        return new ConsentPageRedirectingResourceOwnerAuthenticationSuccessHandler(endpointsSpec);
     }
   
     @Bean
     @ConditionalOnMissingBean
-    public AuthenticationPageProvider authenticationPageProvider() {
-        return new DefaultAuthenticationPageProvider();
+    public AuthenticationPageProvider authenticationPageProvider(CelloOauth2ServerEndpointsSpec endpointsSpec) {
+        return new DefaultAuthenticationPageProvider(endpointsSpec);
     }
 }

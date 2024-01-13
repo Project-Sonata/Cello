@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.core.authentication;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
+import com.odeyalo.sonata.cello.web.CelloOauth2ServerEndpointsSpec;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,6 +11,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class DefaultAuthenticationPageProvider implements AuthenticationPageProvider {
+    private final CelloOauth2ServerEndpointsSpec celloOauth2ServerEndpointsSpec;
+
+    public DefaultAuthenticationPageProvider(CelloOauth2ServerEndpointsSpec celloOauth2ServerEndpointsSpec) {
+        this.celloOauth2ServerEndpointsSpec = celloOauth2ServerEndpointsSpec;
+    }
 
     @Override
     @NotNull
@@ -94,7 +100,7 @@ public class DefaultAuthenticationPageProvider implements AuthenticationPageProv
                 "\n" +
                 "<div class=\"login-container\">\n" +
                 "    <h2>Login</h2>\n" +
-                "    <form class=\"login-form\" action=\"/oauth2/login\" method=\"post\">\n" +
+                "    <form class=\"login-form\" action=\"" + celloOauth2ServerEndpointsSpec.getLoginEndpoint() + "\" method=\"post\">\n" +
                 "<input type=\"hidden\" name=\"flow_id\" value=\"" + flowId + "\">" +
                 "        <div class=\"form-group\">\n" +
                 "            <label for=\"username\">Username:</label>\n" +

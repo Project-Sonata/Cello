@@ -98,6 +98,16 @@ public final class ThirdPartyOauth2AuthenticationStarterEndpointTest {
     }
 
     @Test
+    void shouldReturnRedirectWithGeneratedState() {
+        WebTestClient.ResponseSpec responseSpec = sendGoogleAuthenticationRequest();
+
+        URI redirectLocation = responseSpec.returnResult(ResponseEntity.class)
+                .getResponseHeaders().getLocation();
+
+        UriAssert.assertThat(redirectLocation).hasParameter("state");
+    }
+
+    @Test
     void shouldReturnBadRequestStatusOnNotSupportedProvider() {
         WebTestClient.ResponseSpec responseSpec = sendNotSupportedOauth2AuthenticationRequest();
 

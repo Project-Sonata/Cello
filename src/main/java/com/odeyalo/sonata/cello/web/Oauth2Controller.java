@@ -18,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.logging.Level;
 
 @Controller
@@ -87,7 +88,7 @@ public class Oauth2Controller {
         return Mono.just(
                 ResponseEntity.status(302)
                         .header(HttpHeaders.LOCATION, "https://accounts.google.com/o/oauth2/v2/auth?client_id=odeyalooo" +
-                                "&redirect_uri=http://localhost:3000&scope=read%20write")
+                                "&redirect_uri=http://localhost:3000&scope=read%20write&state=" + UUID.randomUUID())
                         .build()
         );
     }

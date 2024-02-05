@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoconfigureCelloWebTestClient
 public final class Oauth2AuthenticationStarterEndpointTest {
 
-    public static final String GOOGLE_OAUTH2_URI_V2_VALUE = "https://accounts.google.com/o/oauth2/v2/auth";
     @Autowired
     WebTestClient webTestClient;
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -34,6 +33,12 @@ public final class Oauth2AuthenticationStarterEndpointTest {
 
     static final String SESSION_COOKIE_NAME = "SESSION";
     static final String FLOW_ID_QUERY_PARAM_NAME = "flow_id";
+
+    static final String GOOGLE_OAUTH2_URI_V2_VALUE = "https://accounts.google.com/o/oauth2/v2/auth";
+    static final String GOOGLE_PROVIDER_NAME = "google";
+
+    static final String NOT_SUPPORTED_PROVIDER_NAME = "not_supported";
+
 
     String currentFlowId;
     String currentSessionId;
@@ -62,11 +67,28 @@ public final class Oauth2AuthenticationStarterEndpointTest {
 
     }
 
+    @Test
+    void shouldReturnBadRequestStatusOnNotSupportedProvider() {
+        WebTestClient.ResponseSpec responseSpec = sendNotSupportedOauth2AuthenticationRequest();
+
+        responseSpec.expectStatus().isBadRequest();
+    }
+
     @NotNull
     private WebTestClient.ResponseSpec sendGoogleAuthenticationRequest() {
+        return sendThirdPartyOauth2AuthenticationRequest(GOOGLE_PROVIDER_NAME);
+    }
+
+    @NotNull
+    private WebTestClient.ResponseSpec sendNotSupportedOauth2AuthenticationRequest() {
+        return sendThirdPartyOauth2AuthenticationRequest(NOT_SUPPORTED_PROVIDER_NAME);
+    }
+
+    @NotNull
+    private WebTestClient.ResponseSpec sendThirdPartyOauth2AuthenticationRequest(String providerName) {
         return webTestClient.get()
                 .uri(builder -> builder
-                        .path("/oauth2/login/google")
+                        .path("/oauth2/login/" + providerName)
                         .queryParam(FLOW_ID_QUERY_PARAM_NAME, currentFlowId)
                         .build())
                 .cookie(SESSION_COOKIE_NAME, currentSessionId)

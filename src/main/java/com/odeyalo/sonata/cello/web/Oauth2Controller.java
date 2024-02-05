@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.logging.Level;
 
 @Controller
@@ -76,13 +77,17 @@ public class Oauth2Controller {
 
     @GetMapping("/login/{providerName}")
     public Mono<ResponseEntity<Void>> thirdPartyAuthenticationProvider(Oauth2AuthorizationRequest request,
-                                                       ServerWebExchange exchange,
-                                                       @PathVariable String providerName) {
-
+                                                                       ServerWebExchange exchange,
+                                                                       @PathVariable String providerName) {
+        if ( !Objects.equals(providerName, "google") ) {
+            return Mono.just(
+                    ResponseEntity.badRequest().build()
+            );
+        }
         return Mono.just(
-            ResponseEntity.status(302)
-                    .header(HttpHeaders.LOCATION, "https://accounts.google.com/o/oauth2/v2/auth")
-                    .build()
+                ResponseEntity.status(302)
+                        .header(HttpHeaders.LOCATION, "https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=localhost:3000")
+                        .build()
         );
     }
 

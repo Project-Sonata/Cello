@@ -86,7 +86,8 @@ public class Oauth2Controller {
         }
         return Mono.just(
                 ResponseEntity.status(302)
-                        .header(HttpHeaders.LOCATION, "https://accounts.google.com/o/oauth2/v2/auth?client_id=odeyalooo&redirect_uri=localhost:3000")
+                        .header(HttpHeaders.LOCATION, "https://accounts.google.com/o/oauth2/v2/auth?client_id=odeyalooo" +
+                                "&redirect_uri=http://localhost:3000")
                         .build()
         );
     }

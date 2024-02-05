@@ -13,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -75,6 +72,18 @@ public class Oauth2Controller {
     public Mono<Void> getConsentPage(Oauth2AuthorizationRequest request, ServerWebExchange exchange) {
 
         return oauth2ConsentPageProvider.getConsentPage(request, ResourceOwner.withPrincipalOnly("odeyalo"), exchange);
+    }
+
+    @GetMapping("/login/{providerName}")
+    public Mono<ResponseEntity<Void>> thirdPartyAuthenticationProvider(Oauth2AuthorizationRequest request,
+                                                       ServerWebExchange exchange,
+                                                       @PathVariable String providerName) {
+
+        return Mono.just(
+            ResponseEntity.status(302)
+                    .header(HttpHeaders.LOCATION, "https://accounts.google.com/o/oauth2/v2/auth")
+                    .build()
+        );
     }
 
     @PostMapping("/consent")

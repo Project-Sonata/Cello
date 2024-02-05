@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @RegisterOauth2Clients
 @AutoconfigureCelloWebTestClient
-public final class Oauth2AuthenticationStarterEndpointTest {
+public final class ThirdPartyOauth2AuthenticationStarterEndpointTest {
 
     @Autowired
     WebTestClient webTestClient;

@@ -3,11 +3,13 @@ package com.odeyalo.sonata.cello.web;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
+import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRedirectUriProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.AuthenticatedResourceOwnerAuthentication;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentPageProvider;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentSubmissionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
-import java.util.UUID;
 import java.util.logging.Level;
 
 @Controller
@@ -76,21 +76,16 @@ public class Oauth2Controller {
         return oauth2ConsentPageProvider.getConsentPage(request, ResourceOwner.withPrincipalOnly("odeyalo"), exchange);
     }
 
+    @Autowired
+    Oauth2ProviderRedirectUriProvider oauth2ProviderRedirectUriProvider;
+
     @GetMapping("/login/{providerName}")
-    public Mono<ResponseEntity<Void>> thirdPartyAuthenticationProvider(Oauth2AuthorizationRequest request,
+    public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProvider(Oauth2AuthorizationRequest request,
                                                                        ServerWebExchange exchange,
                                                                        @PathVariable String providerName) {
-        if ( !Objects.equals(providerName, "google") ) {
-            return Mono.just(
-                    ResponseEntity.badRequest().build()
-            );
-        }
-        return Mono.just(
-                ResponseEntity.status(302)
-                        .header(HttpHeaders.LOCATION, "https://accounts.google.com/o/oauth2/v2/auth?client_id=odeyalooo" +
-                                "&redirect_uri=http://localhost:3000&scope=read%20write&state=" + UUID.randomUUID() + "&response_type=code")
-                        .build()
-        );
+        return oauth2ProviderRedirectUriProvider.getProviderRedirectUri(providerName)
+                .map(redirectUri -> ResponseEntity.status(302).location(redirectUri).build())
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @PostMapping("/consent")

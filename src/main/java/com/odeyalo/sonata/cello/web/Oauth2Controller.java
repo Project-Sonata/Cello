@@ -3,7 +3,7 @@ package com.odeyalo.sonata.cello.web;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
-import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRedirectUriProvider;
+import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRedirectUriProviderManager;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.AuthenticatedResourceOwnerAuthentication;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
@@ -77,13 +77,13 @@ public class Oauth2Controller {
     }
 
     @Autowired
-    Oauth2ProviderRedirectUriProvider oauth2ProviderRedirectUriProvider;
+    Oauth2ProviderRedirectUriProviderManager oauth2ProviderRedirectUriProviderManager;
 
     @GetMapping("/login/{providerName}")
     public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProvider(Oauth2AuthorizationRequest request,
                                                                        ServerWebExchange exchange,
                                                                        @PathVariable String providerName) {
-        return oauth2ProviderRedirectUriProvider.getProviderRedirectUri(providerName)
+        return oauth2ProviderRedirectUriProviderManager.getProviderRedirectUri(providerName)
                 .map(redirectUri -> ResponseEntity.status(302).location(redirectUri).build())
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

@@ -22,7 +22,7 @@ public class UsernamePasswordResourceOwnerAuthenticationManager implements Resou
     public Mono<AuthenticatedResourceOwnerAuthentication> attemptAuthentication(@NotNull ServerWebExchange webExchange) {
         MediaType requestContentType = webExchange.getRequest().getHeaders().getContentType();
 
-        if ( isMatchingRequest(requestContentType) ) {
+        if ( isNotMatchingRequest(requestContentType) ) {
             return Mono.empty();
         }
 
@@ -39,7 +39,7 @@ public class UsernamePasswordResourceOwnerAuthenticationManager implements Resou
                 });
     }
 
-    private static boolean isMatchingRequest(MediaType requestContentType) {
+    private static boolean isNotMatchingRequest(MediaType requestContentType) {
         return !MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(requestContentType)
                 && !MediaType.MULTIPART_FORM_DATA.equalsTypeAndSubtype(requestContentType);
     }

@@ -9,7 +9,7 @@ import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentPageProvider;
 import com.odeyalo.sonata.cello.core.consent.Oauth2ConsentSubmissionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,24 +23,13 @@ import java.util.logging.Level;
 
 @Controller
 @RequestMapping("/oauth2")
+@RequiredArgsConstructor
 public class Oauth2Controller {
-
     private final ResourceOwnerAuthenticator resourceOwnerAuthenticationManager;
     private final AuthenticationPageProvider authenticationPageProvider;
-
     private final Oauth2ConsentPageProvider oauth2ConsentPageProvider;
     private final Oauth2ConsentSubmissionHandler oauth2ConsentSubmissionHandler;
-
-    public Oauth2Controller(ResourceOwnerAuthenticator resourceOwnerAuthenticationManager,
-                            AuthenticationPageProvider authenticationPageProvider,
-                            Oauth2ConsentPageProvider oauth2ConsentPageProvider,
-                            Oauth2ConsentSubmissionHandler oauth2ConsentSubmissionHandler) {
-
-        this.resourceOwnerAuthenticationManager = resourceOwnerAuthenticationManager;
-        this.authenticationPageProvider = authenticationPageProvider;
-        this.oauth2ConsentPageProvider = oauth2ConsentPageProvider;
-        this.oauth2ConsentSubmissionHandler = oauth2ConsentSubmissionHandler;
-    }
+    private final Oauth2ProviderRedirectUriProviderManager oauth2ProviderRedirectUriProviderManager;
 
     @GetMapping(value = "/authorize")
     @ResponseBody
@@ -54,7 +43,6 @@ public class Oauth2Controller {
                         .build()
         );
     }
-
 
     @GetMapping(value = "/login")
     public Mono<Void> handleLogin(ServerWebExchange exchange) {
@@ -76,13 +64,8 @@ public class Oauth2Controller {
         return oauth2ConsentPageProvider.getConsentPage(request, ResourceOwner.withPrincipalOnly("odeyalo"), exchange);
     }
 
-    @Autowired
-    Oauth2ProviderRedirectUriProviderManager oauth2ProviderRedirectUriProviderManager;
-
     @GetMapping("/login/{providerName}")
-    public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProvider(Oauth2AuthorizationRequest request,
-                                                                       ServerWebExchange exchange,
-                                                                       @PathVariable String providerName) {
+    public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProvider(@PathVariable String providerName) {
         return oauth2ProviderRedirectUriProviderManager.getProviderRedirectUri(providerName)
                 .map(redirectUri -> ResponseEntity.status(302).location(redirectUri).build())
                 .defaultIfEmpty(ResponseEntity.badRequest().build());

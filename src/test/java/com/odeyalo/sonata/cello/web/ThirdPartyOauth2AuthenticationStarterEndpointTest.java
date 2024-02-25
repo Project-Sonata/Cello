@@ -1,11 +1,19 @@
 package com.odeyalo.sonata.cello.web;
 
+import com.odeyalo.sonata.cello.core.authentication.oauth2.InMemoryOauth2ProviderRegistrationRepository;
+import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRegistration;
+import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRegistrationRepository;
+import com.odeyalo.sonata.cello.web.ThirdPartyOauth2AuthenticationStarterEndpointTest.Config;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,6 +23,8 @@ import testing.*;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @RegisterOauth2Clients
 @AutoconfigureCelloWebTestClient
+@Import(Config.class)
 public final class ThirdPartyOauth2AuthenticationStarterEndpointTest {
 
     @Autowired
@@ -162,5 +173,23 @@ public final class ThirdPartyOauth2AuthenticationStarterEndpointTest {
 
         currentFlowId = UriUtils.parseQueryParameters(uri).get(FLOW_ID_QUERY_PARAM_NAME);
         currentSessionId = sessionCookie.getValue();
+    }
+
+    @TestConfiguration
+    public static class Config {
+
+        @Bean
+        @Primary
+        public Oauth2ProviderRegistrationRepository testingOauth2ProviderRegistration() {
+            Map<String, Oauth2ProviderRegistration> cache = Map.of("google", Oauth2ProviderRegistration.builder()
+                    .providerUri("https://accounts.google.com/o/oauth2/v2/auth")
+                    .clientId("odeyalooo")
+                    .clientSecret("secret")
+                    .redirectUri("http://localhost:3000")
+                    .scopes(Set.of("read", "write"))
+                    .build()
+            );
+            return new InMemoryOauth2ProviderRegistrationRepository(cache);
+        }
     }
 }

@@ -116,8 +116,14 @@ public class DefaultAuthenticationPageProvider implements AuthenticationPageProv
                 "            <button type=\"submit\">Login</button>\n" +
                 "        </div>\n" +
                 "    </form>\n" +
-                "</div>\n" +
                 "\n" +
+                "    <div class=\"oauth-providers\">\n" +
+                "        <div class=\"google-provider\">\n" +
+                "            <a href=\"/oauth2/login/google?flow_id=" + flowId + "\">Google</a>\n" +
+                "        </div>\n" +
+                "    </div>" +
+                "\n" +
+                "</div>\n" +
                 "</body>\n" +
                 "</html>\n";
     }

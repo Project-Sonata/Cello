@@ -8,6 +8,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+/**
+ * @deprecated The version contains bad code, written a new better version {@link ProviderDelegateResourceOwnerAuthenticationManager}.
+ */
+@Deprecated(forRemoval = true, since = "1.0.0")
 public class UsernamePasswordResourceOwnerAuthenticationManager implements ResourceOwnerAuthenticationManager {
     private final ResourceOwnerService resourceOwnerService;
     private static final String USERNAME_FORM_DATA_KEY = "username";

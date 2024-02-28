@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Authenticate the user in any possible way.
- * Default implementation is {@link UsernamePasswordResourceOwnerAuthenticationManager}
+ * Default implementation is {@link ProviderDelegateResourceOwnerAuthenticationManager}
  */
 public interface ResourceOwnerAuthenticationManager {
 

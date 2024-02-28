@@ -71,6 +71,13 @@ public class Oauth2Controller {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @GetMapping("/login/{providerName}/callback")
+    public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProviderCallback(@PathVariable String providerName) {
+        return Mono.just(
+                ResponseEntity.status(HttpStatus.FOUND).build()
+        );
+    }
+
     @PostMapping("/consent")
     public Mono<Void> handleConsentSubmission(Oauth2AuthorizationRequest oauth2AuthorizationRequest, AuthenticatedResourceOwnerAuthentication authentication, ServerWebExchange webExchange) {
         ResourceOwner resourceOwner = authentication.getResourceOwner();

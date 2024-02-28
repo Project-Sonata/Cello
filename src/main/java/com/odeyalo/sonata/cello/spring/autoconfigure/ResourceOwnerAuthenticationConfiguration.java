@@ -26,9 +26,22 @@ public class ResourceOwnerAuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceOwnerAuthenticationManager resourceOwnerAuthenticationManager(ResourceOwnerService resourceOwnerService) {
-        logger.debug("Using username and password strategy to authenticate the resource owners");
-        return new UsernamePasswordResourceOwnerAuthenticationManager(resourceOwnerService);
+    public AuthenticationCredentialsConverter authenticationCredentialsConverter() {
+        return new FormDataUsernamePasswordAuthenticationCredentialsConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ResourceOwnerAuthenticationProvider resourceOwnerAuthenticationProvider(ResourceOwnerService resourceOwnerService) {
+        return new UsernamePasswordResourceOwnerAuthenticationProvider(resourceOwnerService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ResourceOwnerAuthenticationManager resourceOwnerAuthenticationManager(AuthenticationCredentialsConverter converter,
+                                                                                 ResourceOwnerAuthenticationProvider provider) {
+        logger.debug("Using {} to handle the authentication", provider);
+        return new ProviderDelegateResourceOwnerAuthenticationManager(converter, provider);
     }
 
     @Bean

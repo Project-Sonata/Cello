@@ -1,7 +1,6 @@
 package com.odeyalo.sonata.cello.core.consent;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.RedirectUriProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.web.server.DefaultServerRedirectStrategy;
@@ -13,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 /**
- * Default implementation of {@link Oauth2ConsentDeniedHandler} that just redirect resource owner to {@link RedirectUriProvider#getRedirectUri()}
+ * Default implementation of {@link Oauth2ConsentDeniedHandler} that just redirect resource owner to {@link Oauth2AuthorizationRequest#getRedirectUri()}
  * and appends a 'error' parameter with 'access_denied' to it.
  */
 public final class DefaultOauth2ConsentDeniedHandler implements Oauth2ConsentDeniedHandler {

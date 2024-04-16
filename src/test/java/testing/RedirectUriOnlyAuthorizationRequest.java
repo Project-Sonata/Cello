@@ -1,14 +1,16 @@
 package testing;
 
-import com.odeyalo.sonata.cello.core.*;
+import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.Oauth2ResponseType;
+import com.odeyalo.sonata.cello.core.RedirectUri;
+import com.odeyalo.sonata.cello.core.ScopeContainer;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Value
-public class RedirectUriOnlyAuthorizationRequest implements Oauth2AuthorizationRequest, RedirectUriProvider {
+public class RedirectUriOnlyAuthorizationRequest implements Oauth2AuthorizationRequest {
     RedirectUri redirectUri;
-
 
     @Override
     public @NotNull String getClientId() {

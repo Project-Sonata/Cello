@@ -1,9 +1,6 @@
 package com.odeyalo.sonata.cello.core.responsetype.implicit;
 
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.RedirectUri;
-import com.odeyalo.sonata.cello.core.RedirectUriProvider;
-import com.odeyalo.sonata.cello.core.ScopeContainer;
+import com.odeyalo.sonata.cello.core.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -41,4 +38,10 @@ public class ImplicitOauth2AuthorizationRequest implements Oauth2AuthorizationRe
      */
     @Nullable
     String state;
+
+    @Override
+    @NotNull
+    public Oauth2ResponseType getResponseType() {
+        return Oauth2ResponseType.IMPLICIT;
+    }
 }

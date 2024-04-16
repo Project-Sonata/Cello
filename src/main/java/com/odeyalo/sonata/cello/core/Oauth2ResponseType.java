@@ -15,7 +15,6 @@ public class Oauth2ResponseType {
     String name;
 
     public static final Oauth2ResponseType UNKNOWN = new Oauth2ResponseType(null);
-    public static final Oauth2ResponseType IMPLICIT = new Oauth2ResponseType("implicit");
 
     public static Oauth2ResponseType create(@Nullable String name) {
         if ( name == null ) {

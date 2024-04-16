@@ -42,6 +42,6 @@ public class ImplicitOauth2AuthorizationRequest implements Oauth2AuthorizationRe
     @Override
     @NotNull
     public Oauth2ResponseType getResponseType() {
-        return Oauth2ResponseType.IMPLICIT;
+        return DefaultOauth2ResponseTypes.IMPLICIT;
     }
 }

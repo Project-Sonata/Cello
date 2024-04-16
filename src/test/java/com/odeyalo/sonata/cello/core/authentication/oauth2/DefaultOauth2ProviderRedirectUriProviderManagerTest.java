@@ -1,5 +1,7 @@
 package com.odeyalo.sonata.cello.core.authentication.oauth2;
 
+import com.odeyalo.sonata.cello.core.ScopeContainer;
+import com.odeyalo.sonata.cello.core.SimpleScope;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
@@ -7,7 +9,6 @@ import testing.UriUtils;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static testing.UriAssert.assertThat;
@@ -16,7 +17,10 @@ class DefaultOauth2ProviderRedirectUriProviderManagerTest {
     static final Oauth2ProviderRegistration GOOGLE_PROVIDER_REGISTRATION = Oauth2ProviderRegistration.builder()
             .providerUri("http://localhost:3000/oauth2")
             .redirectUri("http://localhost:4000/oauth2/login/google/callback")
-            .scopes(Set.of("read", "write"))
+            .scopes(ScopeContainer.fromArray(
+                            SimpleScope.withName("read"),
+                            SimpleScope.withName("write")
+                    ))
             .clientId("odeyalo")
             .clientSecret("s3cr3t")
             .build();
@@ -95,6 +99,6 @@ class DefaultOauth2ProviderRedirectUriProviderManagerTest {
 
         String[] parsedScopes = scopes.split(" ");
         Assertions.assertThat(parsedScopes).hasSize(2);
-        Assertions.assertThat(parsedScopes).containsExactlyInAnyOrder(GOOGLE_PROVIDER_REGISTRATION.getScopes().toArray(new String[0]));
+        Assertions.assertThat(parsedScopes).containsExactlyInAnyOrder("read", "write");
     }
 }

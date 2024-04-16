@@ -30,7 +30,7 @@ public final class DefaultOauth2ProviderRedirectUriProviderManager implements Oa
                 .queryParam(Oauth2RequestParameters.RESPONSE_TYPE, "code")
                 .queryParam(Oauth2RequestParameters.REDIRECT_URI, oauth2ProviderRegistration.getRedirectUri())
                 .queryParam(Oauth2RequestParameters.CLIENT_ID, oauth2ProviderRegistration.getClientId())
-                .queryParam(Oauth2RequestParameters.SCOPE, String.join(" ", oauth2ProviderRegistration.getScopes()))
+                .queryParam(Oauth2RequestParameters.SCOPE, oauth2ProviderRegistration.getScopes().asOauth2String())
                 .build().toUri();
     }
 }

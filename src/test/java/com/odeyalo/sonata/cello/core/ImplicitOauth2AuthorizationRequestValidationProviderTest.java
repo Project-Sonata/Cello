@@ -20,8 +20,7 @@ class ImplicitOauth2AuthorizationRequestValidationProviderTest {
                 new InMemoryOauth2RegisteredClientService()
         );
 
-        Oauth2AuthorizationRequest mockRequest = new Oauth2AuthorizationRequest() {
-        };
+        Oauth2AuthorizationRequest mockRequest = MockOauth2AuthorizationRequest.create();
 
         testable.supports(mockRequest)
                 .as(StepVerifier::create)

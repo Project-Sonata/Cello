@@ -1,11 +1,8 @@
 package com.odeyalo.sonata.cello.core.consent;
 
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.RedirectUri;
-import com.odeyalo.sonata.cello.core.RedirectUriProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.web.server.DefaultServerRedirectStrategy;
 import org.springframework.security.web.server.ServerRedirectStrategy;
 import org.springframework.web.server.ServerWebExchange;
@@ -15,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 /**
- * Default implementation of {@link Oauth2ConsentDeniedHandler} that just redirect resource owner to {@link RedirectUriProvider#getRedirectUri()}
+ * Default implementation of {@link Oauth2ConsentDeniedHandler} that just redirect resource owner to {@link Oauth2AuthorizationRequest#getRedirectUri()}
  * and appends a 'error' parameter with 'access_denied' to it.
  */
 public final class DefaultOauth2ConsentDeniedHandler implements Oauth2ConsentDeniedHandler {
@@ -36,19 +33,11 @@ public final class DefaultOauth2ConsentDeniedHandler implements Oauth2ConsentDen
                                       @NotNull ConsentDecision decision,
                                       @NotNull ServerWebExchange httpExchange) {
 
-        if ( request instanceof RedirectUriProvider redirectUriProvider ) {
-            RedirectUri redirectUri = redirectUriProvider.getRedirectUri();
+        URI errorAwareRedirectUri = UriComponentsBuilder.fromUri(request.getRedirectUri().asUri())
+                .queryParam("error", "access_denied")
+                .build()
+                .toUri();
 
-            URI errorAwareRedirectUri = UriComponentsBuilder.fromUri(redirectUri.asUri())
-                    .queryParam("error", "access_denied")
-                    .build()
-                    .toUri();
-
-            return serverRedirectStrategy.sendRedirect(httpExchange, errorAwareRedirectUri);
-        }
-
-        return Mono.error(
-                new IllegalArgumentException("Can't redirect the resource owner. No redirect uri is known")
-        );
+        return serverRedirectStrategy.sendRedirect(httpExchange, errorAwareRedirectUri);
     }
 }

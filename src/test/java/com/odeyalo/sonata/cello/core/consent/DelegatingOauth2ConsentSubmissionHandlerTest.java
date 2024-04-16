@@ -1,11 +1,8 @@
 package com.odeyalo.sonata.cello.core.consent;
 
 import com.odeyalo.sonata.cello.core.MockOauth2AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.RedirectUri;
-import com.odeyalo.sonata.cello.core.RedirectUriProvider;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import lombok.Value;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +10,7 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.security.web.server.savedrequest.CookieServerRequestCache;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
+import testing.RedirectUriOnlyAuthorizationRequest;
 import testing.UriAssert;
 
 import java.net.URI;
@@ -77,7 +75,7 @@ class DelegatingOauth2ConsentSubmissionHandlerTest {
                         .body("action=denied")
         );
         // when
-        testable.handleConsentSubmission(new RedirectUriRequest(RedirectUri.create("http://localhost:3000/callback")),
+        testable.handleConsentSubmission(new RedirectUriOnlyAuthorizationRequest(RedirectUri.create("http://localhost:3000/callback")),
                 ResourceOwner.withPrincipalOnly("odeyalo"),
                 webExchange)
                 .block();
@@ -90,10 +88,5 @@ class DelegatingOauth2ConsentSubmissionHandlerTest {
         UriAssert.assertThat(redirectLocation).isEqualToWithoutQueryParameters("http://localhost:3000/callback");
 
         assertThat(redirectLocation).hasParameter("error", "access_denied");
-    }
-
-    @Value
-    private static class RedirectUriRequest implements Oauth2AuthorizationRequest, RedirectUriProvider {
-        RedirectUri redirectUri;
     }
 }

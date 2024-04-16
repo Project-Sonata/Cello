@@ -7,16 +7,12 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Convert the {@link ServerWebExchange} to {@link ImplicitOauth2AuthorizationRequest}
  */
 public class ImplicitOauth2AuthorizationRequestConverter implements Oauth2AuthorizationRequestConverter {
-
-    public static final String SCOPES_SPLITERATOR = " ";
 
     @Override
     @NotNull
@@ -62,12 +58,9 @@ public class ImplicitOauth2AuthorizationRequestConverter implements Oauth2Author
         String scopesStr = requestParameters.getFirst(Oauth2RequestParameters.SCOPE);
 
         if ( scopesStr != null ) {
-            List<SimpleScope> scopes = Arrays.stream(scopesStr.split(SCOPES_SPLITERATOR))
-                    .map(SimpleScope::withName)
-                    .toList();
-
-            builder.scopes(ScopeContainer.fromCollection(scopes));
+            builder.scopes(ScopeContainer.fromOauth2String(scopesStr));
         }
+
         return Mono.just(
                 builder.build()
         );

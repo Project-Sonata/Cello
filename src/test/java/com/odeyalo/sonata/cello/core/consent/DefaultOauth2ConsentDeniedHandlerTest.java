@@ -1,14 +1,12 @@
 package com.odeyalo.sonata.cello.core.consent;
 
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
-import com.odeyalo.sonata.cello.core.RedirectUri;
-import com.odeyalo.sonata.cello.core.RedirectUriProvider;
+import com.odeyalo.sonata.cello.core.*;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import lombok.Value;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
+import testing.RedirectUriOnlyAuthorizationRequest;
 import testing.UriAssert;
 
 import java.net.URI;
@@ -72,8 +70,4 @@ class DefaultOauth2ConsentDeniedHandlerTest {
         assertThat(redirectLocation).hasParameter("error", "access_denied");
     }
 
-    @Value
-    private static class RedirectUriOnlyAuthorizationRequest implements Oauth2AuthorizationRequest, RedirectUriProvider {
-        RedirectUri redirectUri;
-    }
 }

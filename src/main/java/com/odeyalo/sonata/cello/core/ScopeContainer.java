@@ -5,10 +5,7 @@ import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -30,6 +27,14 @@ public class ScopeContainer implements Iterable<Scope> {
     }
 
     public static ScopeContainer fromCollection(Collection<? extends Scope> scopes) {
+        return builder().scopes(scopes).build();
+    }
+
+    public static ScopeContainer fromOauth2String(String scopesInOauth2Spec) {
+        List<SimpleScope> scopes = Arrays.stream(scopesInOauth2Spec.split(" "))
+                .map(SimpleScope::withName)
+                .toList();
+
         return builder().scopes(scopes).build();
     }
 

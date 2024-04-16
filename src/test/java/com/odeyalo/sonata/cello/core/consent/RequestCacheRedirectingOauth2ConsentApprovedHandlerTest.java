@@ -1,6 +1,6 @@
 package com.odeyalo.sonata.cello.core.consent;
 
-import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.core.MockOauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ class RequestCacheRedirectingOauth2ConsentApprovedHandlerTest {
                         .build()
         );
 
-        testable.onConsentApproved(new MockAuthorizationRequest(), ResourceOwner.withPrincipalOnly("odeyalo"), new ApprovedConsentDecision(), webExchange).block();
+        testable.onConsentApproved(MockOauth2AuthorizationRequest.create(), ResourceOwner.withPrincipalOnly("odeyalo"), new ApprovedConsentDecision(), webExchange).block();
 
         assertThat(webExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FOUND);
     }
@@ -59,12 +59,8 @@ class RequestCacheRedirectingOauth2ConsentApprovedHandlerTest {
                         .build()
         );
 
-        testable.onConsentApproved(new MockAuthorizationRequest(), ResourceOwner.withPrincipalOnly("odeyalo"), new ApprovedConsentDecision(), webExchange).block();
+        testable.onConsentApproved(MockOauth2AuthorizationRequest.create(), ResourceOwner.withPrincipalOnly("odeyalo"), new ApprovedConsentDecision(), webExchange).block();
 
         assertThat(webExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FOUND);
-    }
-
-
-    private static class MockAuthorizationRequest implements Oauth2AuthorizationRequest {
     }
 }

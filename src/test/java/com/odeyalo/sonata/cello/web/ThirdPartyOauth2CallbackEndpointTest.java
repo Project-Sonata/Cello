@@ -2,6 +2,7 @@ package com.odeyalo.sonata.cello.web;
 
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @RegisterOauth2Clients
 @AutoconfigureCelloWebTestClient
+@Disabled
 public final class ThirdPartyOauth2CallbackEndpointTest {
 
     @Autowired

@@ -3,7 +3,7 @@ package com.odeyalo.sonata.cello.web;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.authentication.AuthenticationPageProvider;
-import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRedirectUriProviderManager;
+import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2AuthenticationManager;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.AuthenticatedResourceOwnerAuthentication;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwnerAuthenticator;
@@ -29,7 +29,7 @@ public class Oauth2Controller {
     private final AuthenticationPageProvider authenticationPageProvider;
     private final Oauth2ConsentPageProvider oauth2ConsentPageProvider;
     private final Oauth2ConsentSubmissionHandler oauth2ConsentSubmissionHandler;
-    private final Oauth2ProviderRedirectUriProviderManager oauth2ProviderRedirectUriProviderManager;
+    private final Oauth2AuthenticationManager oauth2AuthenticationManager;
 
     @GetMapping(value = "/authorize")
     @ResponseBody
@@ -65,16 +65,15 @@ public class Oauth2Controller {
     }
 
     @GetMapping("/login/{providerName}")
-    public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProvider(@PathVariable String providerName) {
-        return oauth2ProviderRedirectUriProviderManager.getProviderRedirectUri(providerName)
-                .map(redirectUri -> ResponseEntity.status(302).location(redirectUri).build())
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    public Mono<Void> thirdPartyAuthenticationProvider(@PathVariable String providerName, ServerWebExchange webExchange) {
+        return oauth2AuthenticationManager.startOauth2Authentication(providerName, webExchange);
     }
 
     @GetMapping("/login/{providerName}/callback")
     public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProviderCallback(@PathVariable String providerName) {
         return Mono.just(
-                ResponseEntity.status(HttpStatus.FOUND).build()
+                ResponseEntity.status(HttpStatus.OK)
+                        .body("THERE IS A CALLBACK FROM: " + providerName)
         );
     }
 

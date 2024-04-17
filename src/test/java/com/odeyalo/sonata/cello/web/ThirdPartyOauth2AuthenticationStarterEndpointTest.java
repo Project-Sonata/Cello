@@ -1,5 +1,7 @@
 package com.odeyalo.sonata.cello.web;
 
+import com.odeyalo.sonata.cello.core.ScopeContainer;
+import com.odeyalo.sonata.cello.core.SimpleScope;
 import com.odeyalo.sonata.cello.core.authentication.oauth2.InMemoryOauth2ProviderRegistrationRepository;
 import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRegistration;
 import com.odeyalo.sonata.cello.core.authentication.oauth2.Oauth2ProviderRegistrationRepository;
@@ -24,7 +26,6 @@ import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -186,7 +187,10 @@ public final class ThirdPartyOauth2AuthenticationStarterEndpointTest {
                     .clientId("odeyalooo")
                     .clientSecret("secret")
                     .redirectUri("http://localhost:3000")
-                    .scopes(Set.of("read", "write"))
+                    .scopes(ScopeContainer.fromArray(
+                            SimpleScope.withName("read"),
+                            SimpleScope.withName("write")
+                    ))
                     .build()
             );
             return new InMemoryOauth2ProviderRegistrationRepository(cache);

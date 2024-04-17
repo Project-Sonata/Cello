@@ -58,6 +58,10 @@ public class ScopeContainer implements Iterable<Scope> {
         return new HashSet<>(getScopes()).containsAll(scopes);
     }
 
+    public String asOauth2String() {
+        return String.join(" ", stream().map(Scope::getName).toList());
+    }
+
     @Nullable
     public Scope get(int index) {
         if ( CollectionUtils.isOutOfBounds(scopes, index) ) {

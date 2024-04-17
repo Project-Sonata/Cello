@@ -7,26 +7,28 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.UUID;
 
 @Component
-public final class DefaultOauth2ProviderRedirectUriProviderManager implements Oauth2ProviderRedirectUriProviderManager{
+public final class DefaultOauth2ProviderRedirectUriGenerator implements Oauth2ProviderRedirectUriGenerator {
     private final Oauth2ProviderRegistrationRepository registrationRepository;
 
-    public DefaultOauth2ProviderRedirectUriProviderManager(Oauth2ProviderRegistrationRepository registrationRepository) {
+    public DefaultOauth2ProviderRedirectUriGenerator(Oauth2ProviderRegistrationRepository registrationRepository) {
         this.registrationRepository = registrationRepository;
     }
 
     @NotNull
-    public Mono<URI> getProviderRedirectUri(@NotNull String providerName) {
+    public Mono<URI> generateOauth2RedirectUri(@NotNull String providerName,
+                                               @NotNull Oauth2AuthenticationRedirectUriGenerationContext context) {
+
         return registrationRepository.findByProviderName(providerName)
-                .map(DefaultOauth2ProviderRedirectUriProviderManager::createRedirectUri);
+                .map(provider -> createRedirectUri(provider, context));
     }
 
     @NotNull
-    private static URI createRedirectUri(Oauth2ProviderRegistration oauth2ProviderRegistration) {
+    private static URI createRedirectUri(Oauth2ProviderRegistration oauth2ProviderRegistration,
+                                         Oauth2AuthenticationRedirectUriGenerationContext context) {
         return UriComponentsBuilder.fromUriString(oauth2ProviderRegistration.getProviderUri())
-                .queryParam(Oauth2RequestParameters.STATE, UUID.randomUUID().toString())
+                .queryParam(Oauth2RequestParameters.STATE, context.getState())
                 .queryParam(Oauth2RequestParameters.RESPONSE_TYPE, "code")
                 .queryParam(Oauth2RequestParameters.REDIRECT_URI, oauth2ProviderRegistration.getRedirectUri())
                 .queryParam(Oauth2RequestParameters.CLIENT_ID, oauth2ProviderRegistration.getClientId())

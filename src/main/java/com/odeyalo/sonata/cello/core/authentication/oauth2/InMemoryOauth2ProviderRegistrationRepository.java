@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.core.authentication.oauth2;
 
 import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -39,5 +40,10 @@ public final class InMemoryOauth2ProviderRegistrationRepository implements Oauth
         return Mono.fromRunnable(
                 () -> cache.remove(providerName)
         );
+    }
+
+    @Override
+    public @NotNull Flux<Oauth2ProviderRegistration> findAll() {
+        return Flux.fromIterable(cache.values());
     }
 }

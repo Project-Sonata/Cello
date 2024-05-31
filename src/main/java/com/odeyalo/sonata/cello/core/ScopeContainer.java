@@ -30,7 +30,11 @@ public class ScopeContainer implements Iterable<Scope> {
         return builder().scopes(scopes).build();
     }
 
-    public static ScopeContainer fromOauth2String(String scopesInOauth2Spec) {
+    public static ScopeContainer fromOauth2String(@Nullable String scopesInOauth2Spec) {
+        if (scopesInOauth2Spec == null) {
+            return empty();
+        }
+
         List<SimpleScope> scopes = Arrays.stream(scopesInOauth2Spec.split(" "))
                 .map(SimpleScope::withName)
                 .toList();

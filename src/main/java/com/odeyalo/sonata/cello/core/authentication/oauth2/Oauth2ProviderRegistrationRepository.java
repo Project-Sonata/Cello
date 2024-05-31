@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.cello.core.authentication.oauth2;
 
 import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -33,4 +34,10 @@ public interface Oauth2ProviderRegistrationRepository {
     @NotNull
     Mono<Void> removeByProviderName(@NotNull String providerName);
 
+    /**
+     * Returns all {@link Oauth2ProviderRegistration} reigsterd in this repository
+     * @return - {@link Flux} of {@link Oauth2ProviderRegistration}
+     */
+    @NotNull
+    Flux<Oauth2ProviderRegistration> findAll();
 }

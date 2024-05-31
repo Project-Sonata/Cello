@@ -5,11 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Value
 @AllArgsConstructor(staticName = "of")
 @Builder
 public class Oauth2ProviderRegistration {
+    String name;
     /**
      * A URI to which resource owner will be redirected to authenticate itself
      */
@@ -31,6 +33,11 @@ public class Oauth2ProviderRegistration {
      */
     @NotNull
     String redirectUri;
+    /**
+     * Endpoint that will be invoked to exchange an authorization code to access token.
+     */
+    @Nullable
+    String tokenEndpoint;
     /**
      * Scopes to include in Oauth2 request to Oauth2 provider, these scopes will be appended to 'scope' query parameter as described in Oauth2 Specification
      */

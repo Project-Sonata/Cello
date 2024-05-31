@@ -9,8 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
+
+import java.util.List;
 
 @Configuration
 public class ResourceOwnerAuthenticationConfiguration {
@@ -25,9 +28,19 @@ public class ResourceOwnerAuthenticationConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public AuthenticationCredentialsConverter authenticationCredentialsConverter() {
+    @Primary
+    public AuthenticationCredentialsConverter authenticationCredentialsConverter(List<AuthenticationCredentialsConverter> delegates) {
+        return new CompositeAuthenticationCredentialsConverter(delegates);
+    }
+
+    @Bean
+    public AuthenticationCredentialsConverter formDataAuthenticationCredentialsConverter() {
         return new FormDataUsernamePasswordAuthenticationCredentialsConverter();
+    }
+
+    @Bean
+    public AuthenticationCredentialsConverter oauth2AuthenticationCredentialsConverter(CallbackOauth2ProviderNameResolver callbackResolver) {
+        return new DefaultOauth2ProviderAuthenticationCredentialsConverter(callbackResolver);
     }
 
     @Bean

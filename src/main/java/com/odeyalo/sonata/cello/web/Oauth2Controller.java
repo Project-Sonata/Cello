@@ -59,9 +59,9 @@ public class Oauth2Controller {
     }
 
     @GetMapping("/consent")
-    public Mono<Void> getConsentPage(Oauth2AuthorizationRequest request, ServerWebExchange exchange) {
+    public Mono<Void> getConsentPage(Oauth2AuthorizationRequest request, AuthenticatedResourceOwnerAuthentication user, ServerWebExchange exchange) {
 
-        return oauth2ConsentPageProvider.getConsentPage(request, ResourceOwner.withPrincipalOnly("odeyalo"), exchange);
+        return oauth2ConsentPageProvider.getConsentPage(request, user.getResourceOwner(), exchange);
     }
 
     @GetMapping("/login/{providerName}")
@@ -70,11 +70,8 @@ public class Oauth2Controller {
     }
 
     @GetMapping("/login/{providerName}/callback")
-    public Mono<ResponseEntity<Object>> thirdPartyAuthenticationProviderCallback(@PathVariable String providerName) {
-        return Mono.just(
-                ResponseEntity.status(HttpStatus.OK)
-                        .body("THERE IS A CALLBACK FROM: " + providerName)
-        );
+    public Mono<Void> thirdPartyAuthenticationProviderCallback(@PathVariable String providerName, ServerWebExchange exchange) {
+        return resourceOwnerAuthenticationManager.authenticate(exchange).then();
     }
 
     @PostMapping("/consent")

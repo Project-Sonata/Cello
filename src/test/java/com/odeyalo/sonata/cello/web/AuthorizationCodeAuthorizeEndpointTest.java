@@ -137,6 +137,15 @@ public final class AuthorizationCodeAuthorizeEndpointTest {
             UriAssert.assertThat(headers.getLocation()).hasParameter("state", AuthorizationCodeSpecs.STATE_VALUE);
         }
 
+        @Test
+        void shouldReturnAuthorizationCodeInUriQueryParameters() {
+            final WebTestClient.ResponseSpec responseSpec = sendApproveConsentRequest();
+
+            final HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
+
+            UriAssert.assertThat(headers.getLocation()).hasNotEmptyQueryParameter("code");
+        }
+
         private void prepareAuthorizationFlow() {
             final CelloWebTestClient.AuthorizationCodeSpec initialAuthorizationCodeRequest = AuthorizationCodeSpecs.valid();
             final WebTestClient.ResponseSpec responseSpec = celloWebTestClient.authorizationCode().sendRequest(initialAuthorizationCodeRequest);

@@ -32,6 +32,7 @@ public final class AuthorizationCodeResponseConverter implements Oauth2Authoriza
 
         final URI redirectUri = UriComponentsBuilder.fromUri(authorizationRequest.getRedirectUri().asUri())
                 .queryParam(STATE, authorizationRequest.getState())
+                .queryParam("code", "mocked")
                 .build()
                 .toUri();
 

@@ -128,6 +128,15 @@ public final class AuthorizationCodeAuthorizeEndpointTest {
             UriAssert.assertThat(headers.getLocation()).isEqualToWithoutQueryParameters(AuthorizationCodeSpecs.ALLOWED_REDIRECT_URI);
         }
 
+        @Test
+        void shouldContainStateParameterInRedirectUriAsWasProvidedInInitialRequest() {
+            final WebTestClient.ResponseSpec responseSpec = sendApproveConsentRequest();
+
+            final HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
+
+            UriAssert.assertThat(headers.getLocation()).hasParameter("state", AuthorizationCodeSpecs.STATE_VALUE);
+        }
+
         private void prepareAuthorizationFlow() {
             final CelloWebTestClient.AuthorizationCodeSpec initialAuthorizationCodeRequest = AuthorizationCodeSpecs.valid();
             final WebTestClient.ResponseSpec responseSpec = celloWebTestClient.authorizationCode().sendRequest(initialAuthorizationCodeRequest);

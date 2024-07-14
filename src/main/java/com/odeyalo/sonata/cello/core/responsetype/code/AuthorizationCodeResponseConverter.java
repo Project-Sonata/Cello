@@ -3,13 +3,17 @@ package com.odeyalo.sonata.cello.core.responsetype.code;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponse;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
-import com.odeyalo.sonata.cello.core.RedirectUri;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
+
+import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.STATE;
 
 @Component
 public final class AuthorizationCodeResponseConverter implements Oauth2AuthorizationResponseConverter {
@@ -24,14 +28,16 @@ public final class AuthorizationCodeResponseConverter implements Oauth2Authoriza
         }
 
         final ServerHttpResponse httpResponse = currentExchange.getResponse();
-        final RedirectUri redirectUri = response.getAssociatedRequest().getRedirectUri();
+        final Oauth2AuthorizationRequest authorizationRequest = response.getAssociatedRequest();
 
+        final URI redirectUri = UriComponentsBuilder.fromUri(authorizationRequest.getRedirectUri().asUri())
+                .queryParam(STATE, authorizationRequest.getState())
+                .build()
+                .toUri();
 
         httpResponse.setStatusCode(HttpStatus.FOUND);
-        httpResponse.getHeaders().setLocation(redirectUri.asUri());
+        httpResponse.getHeaders().setLocation(redirectUri);
 
-        return Mono.just(
-                httpResponse
-        );
+        return Mono.just(httpResponse);
     }
 }

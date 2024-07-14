@@ -6,6 +6,7 @@ public final class AuthorizationCodeSpecs {
 
     public static final String EXISTING_CLIENT_ID = "123";
     public static final String ALLOWED_REDIRECT_URI = "http://localhost:4000";
+    public static final String STATE_VALUE = "authorization_code_state";
 
     public static final String NOT_EXISTING_CLIENT_ID = "not_exist";
     public static final String UNALLOWED_REDIRECT_URI = "http://localhost:20120/not/allowed";
@@ -15,7 +16,7 @@ public final class AuthorizationCodeSpecs {
                 .clientId(EXISTING_CLIENT_ID)
                 .redirectUri(ALLOWED_REDIRECT_URI)
                 .scope("read, write")
-                .state("opaque")
+                .state(STATE_VALUE)
                 .build();
     }
 

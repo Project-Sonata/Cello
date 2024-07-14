@@ -2,22 +2,27 @@ package com.odeyalo.sonata.cello.web;
 
 
 import com.odeyalo.sonata.cello.core.DefaultOauth2ResponseTypes;
+import com.odeyalo.sonata.cello.core.consent.ApprovedConsentDecision;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import testing.UriAssert;
-import testing.WithAuthenticatedResourceOwner;
+import testing.*;
 import testing.spring.configuration.RegisterOauth2Clients;
 
 import java.net.URI;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -25,6 +30,7 @@ import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 @RegisterOauth2Clients
 @WithAuthenticatedResourceOwner
 @AutoConfigureWebTestClient
+@AutoconfigureCelloWebTestClient
 public final class AuthorizationCodeAuthorizeEndpointTest {
     static final String STATE_PARAMETER_VALUE = "opaque";
     static final String EXISTING_CLIENT_ID = "123";
@@ -33,59 +39,124 @@ public final class AuthorizationCodeAuthorizeEndpointTest {
     @Autowired
     WebTestClient webTestClient;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    CelloWebTestClient celloWebTestClient;
 
-    @Test
-    void shouldSendRedirectToConsentPage() {
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class InitialAuthorizationCodeFlowRequestTest {
 
-        final WebTestClient.ResponseSpec responseSpec = sendValidInitialAuthorizationCodeRequest();
+        @Test
+        void shouldSendRedirectToConsentPage() {
 
-        responseSpec.expectStatus().isFound();
+            final WebTestClient.ResponseSpec responseSpec = sendValidInitialAuthorizationCodeRequest();
 
-        final HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
+            responseSpec.expectStatus().isFound();
 
-        final URI locationUri = headers.getLocation();
+            final HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
 
-        UriAssert.assertThat(locationUri).isEqualToWithoutQueryParameters("/oauth2/consent");
+            final URI locationUri = headers.getLocation();
+
+            UriAssert.assertThat(locationUri).isEqualToWithoutQueryParameters("/oauth2/consent");
+        }
+
+        @Test
+        void shouldReturnBadRequestStatusIfClientIdIsMissing() {
+            final WebTestClient.ResponseSpec responseSpec = webTestClient.get()
+                    .uri(builder -> builder.path("/oauth2/authorize")
+                            .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.AUTHORIZATION_CODE.getName())
+                            .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
+                            .queryParam(SCOPE, "read write")
+                            .queryParam(STATE, STATE_PARAMETER_VALUE)
+                            .build())
+                    .exchange();
+
+            responseSpec.expectStatus().isBadRequest();
+        }
+
+        @Test
+        void shouldReturnBadRequestStatusIfRedirectUriIsMissing() {
+            final WebTestClient.ResponseSpec responseSpec = webTestClient.get()
+                    .uri(builder -> builder.path("/oauth2/authorize")
+                            .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.AUTHORIZATION_CODE.getName())
+                            .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
+                            .queryParam(SCOPE, "read write")
+                            .queryParam(STATE, STATE_PARAMETER_VALUE)
+                            .build())
+                    .exchange();
+
+            responseSpec.expectStatus().isBadRequest();
+        }
+
+        @NotNull
+        private WebTestClient.ResponseSpec sendValidInitialAuthorizationCodeRequest() {
+            return webTestClient.get()
+                    .uri(builder -> builder.path("/oauth2/authorize")
+                            .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.AUTHORIZATION_CODE.getName())
+                            .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
+                            .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
+                            .queryParam(SCOPE, "read write")
+                            .queryParam(STATE, STATE_PARAMETER_VALUE)
+                            .build())
+                    .exchange();
+        }
     }
 
-    @Test
-    void shouldReturnBadRequestStatusIfClientIdIsMissing() {
-        final WebTestClient.ResponseSpec responseSpec = webTestClient.get()
-                .uri(builder -> builder.path("/oauth2/authorize")
-                        .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.AUTHORIZATION_CODE.getName())
-                        .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                        .queryParam(SCOPE, "read write")
-                        .queryParam(STATE, STATE_PARAMETER_VALUE)
-                        .build())
-                .exchange();
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class AfterConsentApprovedTest {
+        static final String SESSION_COOKIE_NAME = "SESSION";
+        static final String FLOW_ID_QUERY_PARAMETER_NAME = "flow_id";
 
-        responseSpec.expectStatus().isBadRequest();
-    }
+        String currentFlowId;
+        String currentSessionId;
 
-    @Test
-    void shouldReturnBadRequestStatusIfRedirectUriIsMissing() {
-        final WebTestClient.ResponseSpec responseSpec = webTestClient.get()
-                .uri(builder -> builder.path("/oauth2/authorize")
-                        .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.AUTHORIZATION_CODE.getName())
-                        .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                        .queryParam(SCOPE, "read write")
-                        .queryParam(STATE, STATE_PARAMETER_VALUE)
-                        .build())
-                .exchange();
+        @BeforeEach
+        void prepare() {
+            prepareAuthorizationFlow();
+        }
 
-        responseSpec.expectStatus().isBadRequest();
-    }
+        @Test
+        void shouldReturnRedirectToUriThatWasProvidedInInitialRequest() {
+            final WebTestClient.ResponseSpec responseSpec = sendApproveConsentRequest();
 
-    @NotNull
-    private WebTestClient.ResponseSpec sendValidInitialAuthorizationCodeRequest() {
-        return webTestClient.get()
-                .uri(builder -> builder.path("/oauth2/authorize")
-                        .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.AUTHORIZATION_CODE.getName())
-                        .queryParam(CLIENT_ID, EXISTING_CLIENT_ID)
-                        .queryParam(REDIRECT_URI, ALLOWED_REDIRECT_URI)
-                        .queryParam(SCOPE, "read write")
-                        .queryParam(STATE, STATE_PARAMETER_VALUE)
-                        .build())
-                .exchange();
+            responseSpec.expectStatus().isFound();
+
+            final HttpHeaders headers = responseSpec.returnResult(Void.class).getResponseHeaders();
+
+            UriAssert.assertThat(headers.getLocation()).isEqualToWithoutQueryParameters(AuthorizationCodeSpecs.ALLOWED_REDIRECT_URI);
+        }
+
+        private void prepareAuthorizationFlow() {
+            final CelloWebTestClient.AuthorizationCodeSpec initialAuthorizationCodeRequest = AuthorizationCodeSpecs.valid();
+            final WebTestClient.ResponseSpec responseSpec = celloWebTestClient.authorizationCode().sendRequest(initialAuthorizationCodeRequest);
+
+            responseSpec.expectStatus().isFound();
+
+            final FluxExchangeResult<Void> result = responseSpec.returnResult(Void.class);
+
+            final URI uri = result.getResponseHeaders().getLocation();
+            final ResponseCookie sessionCookie = result.getResponseCookies().getFirst(SESSION_COOKIE_NAME);
+
+            // we need this values to send valid requests, otherwise HTTP 400 BAD Request will be returned :(
+            assertThat(uri).isNotNull();
+            assertThat(sessionCookie).isNotNull();
+
+            currentFlowId = UriUtils.parseQueryParameters(uri).get(FLOW_ID_QUERY_PARAMETER_NAME);
+            currentSessionId = sessionCookie.getValue();
+        }
+
+        @NotNull
+        private WebTestClient.ResponseSpec sendApproveConsentRequest() {
+
+            return celloWebTestClient.consentPage()
+                    .authenticatedUser()
+                    .withSessionId(currentSessionId)
+                    .and()
+                    .withFlowId(currentFlowId)
+                    .ready()
+                    .submitConsentDecision(new ApprovedConsentDecision());
+        }
     }
 }

@@ -14,7 +14,7 @@ import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.*;
 public final class CelloWebTestClient {
     private final WebTestClient webTestClient;
 
-    public CelloWebTestClient(WebTestClient webTestClient) {
+    public CelloWebTestClient(final WebTestClient webTestClient) {
         this.webTestClient = webTestClient;
     }
 
@@ -30,13 +30,17 @@ public final class CelloWebTestClient {
         return LoginClientProps.withWebTestClient(webTestClient);
     }
 
+    public AuthorizationCodeClient authorizationCode() {
+        return new AuthorizationCodeClient();
+    }
+
     @AllArgsConstructor
     @Value
     @Builder
     public static class AuthenticatedClientProps {
         String sessionId;
 
-        public static AuthenticatedClientProps withSessionId(String sessionId) {
+        public static AuthenticatedClientProps withSessionId(final String sessionId) {
             return builder().sessionId(sessionId).build();
         }
     }
@@ -46,7 +50,7 @@ public final class CelloWebTestClient {
      */
     public class ImplicitClient {
 
-        public WebTestClient.ResponseSpec sendRequest(ImplicitSpec requestBody) {
+        public WebTestClient.ResponseSpec sendRequest(final ImplicitSpec requestBody) {
             return webTestClient.get()
                     .uri(builder ->
                             builder
@@ -61,7 +65,7 @@ public final class CelloWebTestClient {
 
         }
 
-        public WebTestClient.ResponseSpec sendUnknownAuthorizationRequest(ImplicitSpec requestBody) {
+        public WebTestClient.ResponseSpec sendUnknownAuthorizationRequest(final ImplicitSpec requestBody) {
             return webTestClient.get()
                     .uri(builder ->
                             builder
@@ -76,15 +80,33 @@ public final class CelloWebTestClient {
         }
     }
 
+    public class AuthorizationCodeClient {
+
+        public WebTestClient.ResponseSpec sendRequest(final AuthorizationCodeSpec requestBody) {
+            return webTestClient.get()
+                    .uri(builder ->
+                            builder
+                                    .path("/oauth2/authorize")
+                                    .queryParam(RESPONSE_TYPE, DefaultOauth2ResponseTypes.AUTHORIZATION_CODE.getName())
+                                    .queryParam(CLIENT_ID, requestBody.getClientId())
+                                    .queryParam(REDIRECT_URI, requestBody.getRedirectUri())
+                                    .queryParam(SCOPE, requestBody.getScope())
+                                    .queryParam(STATE, requestBody.getState())
+                                    .build())
+                    .exchange();
+
+        }
+    }
+
     public static class AuthenticatedClientBuilder<T> {
         private String sessionId;
         T parent;
 
-        public AuthenticatedClientBuilder(T parent) {
+        public AuthenticatedClientBuilder(final T parent) {
             this.parent = parent;
         }
 
-        public AuthenticatedClientBuilder<T> withSessionId(String sessionId) {
+        public AuthenticatedClientBuilder<T> withSessionId(final String sessionId) {
             this.sessionId = sessionId;
             return this;
         }
@@ -97,7 +119,6 @@ public final class CelloWebTestClient {
             return parent;
         }
     }
-
     @Value
     @Builder
     public static class ImplicitSpec {
@@ -109,5 +130,19 @@ public final class CelloWebTestClient {
         String scope;
         @Nullable
         String state;
+
+    }
+    @Value
+    @Builder
+    public static class AuthorizationCodeSpec {
+        @Nullable
+        String clientId;
+        @Nullable
+        String redirectUri;
+        @Nullable
+        String scope;
+        @Nullable
+        String state;
+
     }
 }

@@ -14,9 +14,9 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor(staticName = "of")
 public class AuthorizationCodeResponse implements Oauth2AuthorizationResponse<AuthorizationCodeRequest> {
     @NotNull
+    String authorizationCode;
+    @NotNull
     AuthorizationCodeRequest associatedRequest;
-
-    public static final String BEARER_TOKEN_TYPE = "Bearer";
 
     @Override
     @NotNull
@@ -24,7 +24,7 @@ public class AuthorizationCodeResponse implements Oauth2AuthorizationResponse<Au
         return associatedRequest;
     }
 
-    public static AuthorizationCodeResponse.AuthorizationCodeResponseBuilder withAssociatedRequest(AuthorizationCodeRequest request) {
+    public static AuthorizationCodeResponse.AuthorizationCodeResponseBuilder withAssociatedRequest(final AuthorizationCodeRequest request) {
         return builder().associatedRequest(request);
     }
 

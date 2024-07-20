@@ -9,6 +9,7 @@ import com.odeyalo.sonata.cello.core.authentication.resourceowner.exception.Reso
 import com.odeyalo.sonata.cello.exception.NotSupportedOauth2ProviderException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
@@ -28,6 +29,7 @@ import java.util.List;
  * @see Oauth2ProviderAuthorizationCodeAuthenticationCredentials
  */
 @Component
+@ConditionalOnBean(AuthorizationCodeExchange.class)
 public final class Oauth2ProviderResourceOwnerAuthenticationProvider implements ResourceOwnerAuthenticationProvider {
     private final List<AuthorizationCodeExchange> codeExchangers;
     private final Oauth2AccessTokenResponseAuthenticationConverter authenticationConverter;

@@ -9,14 +9,12 @@ import com.odeyalo.sonata.cello.core.responsetype.Oauth2ResponseTypeHandler;
 import com.odeyalo.sonata.cello.core.responsetype.code.support.AuthorizationCodeGenerator;
 import com.odeyalo.sonata.cello.core.responsetype.code.support.AuthorizationCodeGenerator.AuthorizationCodeGenerationContext;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 
 /**
  * Handle only Authorization code response type as defined in <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1">Authorization Code Grant</a>
  */
-@Component
 public final class AuthorizationCodeResponseTypeHandler implements Oauth2ResponseTypeHandler {
     private final AuthorizationCodeGenerator authorizationCodeGenerator;
     private final Oauth2RegisteredClientService registeredClientService;

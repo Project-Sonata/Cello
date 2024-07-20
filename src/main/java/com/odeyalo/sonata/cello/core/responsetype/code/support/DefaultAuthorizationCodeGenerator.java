@@ -3,7 +3,6 @@ package com.odeyalo.sonata.cello.core.responsetype.code.support;
 import com.odeyalo.sonata.cello.core.responsetype.code.GeneratedAuthorizationCode;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Supplier;
@@ -11,7 +10,6 @@ import java.util.function.Supplier;
 /**
  * Generate a new {@link GeneratedAuthorizationCode} with opaque authorization code value as result.
  */
-@Component
 public final class DefaultAuthorizationCodeGenerator implements AuthorizationCodeGenerator {
     private final Supplier<String> authorizationCodeValueGenerator;
 

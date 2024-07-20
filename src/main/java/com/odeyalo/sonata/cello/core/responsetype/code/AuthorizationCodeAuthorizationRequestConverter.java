@@ -3,14 +3,12 @@ package com.odeyalo.sonata.cello.core.responsetype.code;
 import com.odeyalo.sonata.cello.core.*;
 import com.odeyalo.sonata.cello.exception.MalformedOauth2RequestException;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
-@Component
 public final class AuthorizationCodeAuthorizationRequestConverter implements Oauth2AuthorizationRequestConverter {
 
     @Override

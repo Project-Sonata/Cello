@@ -6,7 +6,6 @@ import com.odeyalo.sonata.cello.core.Oauth2AuthorizationResponseConverter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -15,7 +14,6 @@ import java.net.URI;
 
 import static com.odeyalo.sonata.cello.core.Oauth2RequestParameters.STATE;
 
-@Component
 public final class AuthorizationCodeResponseConverter implements Oauth2AuthorizationResponseConverter {
 
     @Override

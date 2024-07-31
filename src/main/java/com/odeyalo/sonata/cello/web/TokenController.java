@@ -1,5 +1,7 @@
 package com.odeyalo.sonata.cello.web;
 
+import com.odeyalo.sonata.cello.core.grant.AccessTokenRequestConverter;
+import com.odeyalo.sonata.cello.core.grant.AuthorizationCodeAccessTokenRequest;
 import com.odeyalo.sonata.cello.core.responsetype.code.support.AuthorizationCodeService;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerationContext;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerator;
@@ -22,10 +24,14 @@ public final class TokenController {
     @Autowired
     Oauth2AccessTokenGenerator accessTokenGenerator;
 
+    @Autowired
+    AccessTokenRequestConverter accessTokenRequestConverter;
+
     @PostMapping
     public Mono<ResponseEntity<AuthorizationCodeAccessTokenResponse>> handlerAccessTokenRequest(@NotNull final ServerWebExchange exchange) {
-        return exchange.getFormData()
-                .mapNotNull(body -> body.getFirst("code"))
+        return accessTokenRequestConverter.convert(exchange)
+                .cast(AuthorizationCodeAccessTokenRequest.class)
+                .map(AuthorizationCodeAccessTokenRequest::getAuthorizationCode)
                 .flatMap(code -> authorizationCodeService.loadUsing(code))
                 .map(generated -> Oauth2AccessTokenGenerationContext.builder()
                         .scopes(generated.getRequestedScopes())

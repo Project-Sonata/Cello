@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.core.responsetype.code.support;
 
+import com.odeyalo.sonata.cello.core.InMemoryAuthorizationCodeRepository;
 import com.odeyalo.sonata.cello.core.ScopeContainer;
 import com.odeyalo.sonata.cello.core.SimpleScope;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
@@ -16,11 +17,11 @@ import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DefaultAuthorizationCodeGeneratorTest {
+class DefaultAuthorizationCodeServiceTest {
 
     @Test
     void shouldReturnRandomAuthorizationCode() {
-        final DefaultAuthorizationCodeGenerator testable = new DefaultAuthorizationCodeGenerator();
+        final DefaultAuthorizationCodeService testable = new DefaultAuthorizationCodeService(new InMemoryAuthorizationCodeRepository());
 
         final AuthorizationCodeGenerationContext generationContext = AuthorizationCodeGenerationContext.builder()
                 .requestedScopes(ScopeContainer.singleScope(
@@ -41,7 +42,7 @@ class DefaultAuthorizationCodeGeneratorTest {
 
     @Test
     void shouldReturnAuthorizationCodeWithTheSameScopesAsWasProvided() {
-        final DefaultAuthorizationCodeGenerator testable = new DefaultAuthorizationCodeGenerator();
+        final DefaultAuthorizationCodeService testable = new DefaultAuthorizationCodeService(new InMemoryAuthorizationCodeRepository());
 
         final AuthorizationCodeGenerationContext generationContext = AuthorizationCodeGenerationContext.builder()
                 .requestedScopes(ScopeContainer.fromArray(
@@ -54,7 +55,7 @@ class DefaultAuthorizationCodeGeneratorTest {
 
         testable.newAuthorizationCode(generationContext)
                 .as(StepVerifier::create)
-                .assertNext(it -> assertThat(it.getScopes()).containsExactlyInAnyOrder(
+                .assertNext(generatedCode -> assertThat(generatedCode.getMetadata().getRequestedScopes()).containsExactlyInAnyOrder(
                         SimpleScope.withName("read"),
                         SimpleScope.withName("write"))
                 )
@@ -63,7 +64,7 @@ class DefaultAuthorizationCodeGeneratorTest {
 
     @Test
     void shouldReturnAuthorizationCodeWithTheClientForWhichAuthorizationHasBeenGranted() {
-        final DefaultAuthorizationCodeGenerator testable = new DefaultAuthorizationCodeGenerator();
+        final DefaultAuthorizationCodeService testable = new DefaultAuthorizationCodeService(new InMemoryAuthorizationCodeRepository());
         final Oauth2RegisteredClient grantedFor = Oauth2RegisteredClientFaker.create().get();
 
         final AuthorizationCodeGenerationContext generationContext = AuthorizationCodeGenerationContext.builder()
@@ -77,13 +78,13 @@ class DefaultAuthorizationCodeGeneratorTest {
 
         testable.newAuthorizationCode(generationContext)
                 .as(StepVerifier::create)
-                .assertNext(code -> assertThat(code.getGrantedFor()).isEqualTo(grantedFor))
+                .assertNext(code -> assertThat(code.getMetadata().getGrantedFor()).isEqualTo(grantedFor))
                 .verifyComplete();
     }
 
     @Test
     void shouldReturnAuthorizationCodeWithTheResourceOwnerThatGrantedAuthorization() {
-        final DefaultAuthorizationCodeGenerator testable = new DefaultAuthorizationCodeGenerator();
+        final DefaultAuthorizationCodeService testable = new DefaultAuthorizationCodeService(new InMemoryAuthorizationCodeRepository());
         final ResourceOwner grantedBy = ResourceOwner.withPrincipalOnly("odeyalo");
 
         final AuthorizationCodeGenerationContext generationContext = AuthorizationCodeGenerationContext.builder()
@@ -97,15 +98,15 @@ class DefaultAuthorizationCodeGeneratorTest {
 
         testable.newAuthorizationCode(generationContext)
                 .as(StepVerifier::create)
-                .assertNext(code -> assertThat(code.getGrantedBy()).isEqualTo(grantedBy))
+                .assertNext(code -> assertThat(code.getMetadata().getGrantedBy()).isEqualTo(grantedBy))
                 .verifyComplete();
     }
 
     @Test
     void shouldReturnAuthorizationCodeGeneratedBySupplier() {
-        final DefaultAuthorizationCodeGenerator testable = new DefaultAuthorizationCodeGenerator(
-                () -> "mocked_value"
-        );
+        final DefaultAuthorizationCodeService testable = new DefaultAuthorizationCodeService(
+                () -> "mocked_value",
+                new InMemoryAuthorizationCodeRepository());
 
         final AuthorizationCodeGenerationContext generationContext = AuthorizationCodeGenerationContext.builder()
                 .requestedScopes(ScopeContainer.fromArray(
@@ -119,6 +120,38 @@ class DefaultAuthorizationCodeGeneratorTest {
         testable.newAuthorizationCode(generationContext)
                 .as(StepVerifier::create)
                 .assertNext(code -> assertThat(code.getCodeValue()).isEqualTo("mocked_value"))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldLoadMetadataAboutAuthorizationCodeIfAuthorizationCodeIsValid() {
+        final DefaultAuthorizationCodeService testable = new DefaultAuthorizationCodeService(new InMemoryAuthorizationCodeRepository());
+
+        final AuthorizationCodeGenerationContext generationContext = AuthorizationCodeGenerationContext.builder()
+                .requestedScopes(ScopeContainer.fromArray(
+                        SimpleScope.withName("write"),
+                        SimpleScope.withName("read")
+                ))
+                .grantedBy(ResourceOwner.withPrincipalOnly("odeyalo"))
+                .grantedFor(Oauth2RegisteredClientFaker.create().get())
+                .build();
+
+        final GeneratedAuthorizationCode generatedAuthorizationCode = testable.newAuthorizationCode(generationContext).block();
+
+        assertThat(generatedAuthorizationCode).isNotNull();
+        
+        testable.loadUsing(generatedAuthorizationCode.getCodeValue())
+                .as(StepVerifier::create)
+                .assertNext(codeMetadata -> assertThat(codeMetadata).isEqualTo(generatedAuthorizationCode.getMetadata()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnNothingIfAuthorizationCodeDoesNotExist() {
+        final DefaultAuthorizationCodeService testable = new DefaultAuthorizationCodeService(new InMemoryAuthorizationCodeRepository());
+
+        testable.loadUsing("not_existing")
+                .as(StepVerifier::create)
                 .verifyComplete();
     }
 }

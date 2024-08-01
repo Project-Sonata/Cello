@@ -4,11 +4,13 @@ import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.ScopeContainer;
 import com.odeyalo.sonata.cello.core.SimpleScope;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
+import com.odeyalo.sonata.cello.core.client.Oauth2RegisteredClient;
 import com.odeyalo.sonata.cello.core.responsetype.code.AuthorizationCodeClaims;
 import com.odeyalo.sonata.cello.core.responsetype.code.AuthorizationCodeMetadata;
 import com.odeyalo.sonata.cello.core.token.access.InMemoryAccessTokenStore;
 import com.odeyalo.sonata.cello.core.token.access.MockOauth2AccessTokenGenerator;
 import com.odeyalo.sonata.cello.core.token.access.OpaquePersistentOauth2AccessTokenGenerator;
+import com.odeyalo.sonata.cello.exception.AuthorizationCodeStolenException;
 import com.odeyalo.sonata.cello.exception.InvalidAuthorizationCodeException;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
@@ -23,10 +25,11 @@ class AuthorizationCodeGrantHandlerTest {
     @Test
     void shouldGenerateAccessTokenIfAuthorizationCodeIsValid() {
         // given
+        final Oauth2RegisteredClient oauth2Client = Oauth2RegisteredClientFaker.create().get();
         final AuthorizationCodeGrantHandler testable = new AuthorizationCodeGrantHandler(
                 (code) -> Mono.just(AuthorizationCodeMetadata.from(
                         ResourceOwner.withPrincipalOnly("odeyalo"),
-                        Oauth2RegisteredClientFaker.create().get(),
+                        oauth2Client,
                         ScopeContainer.singleScope(SimpleScope.withName("read")),
                         AuthorizationCodeClaims.empty()
                 )),
@@ -36,7 +39,7 @@ class AuthorizationCodeGrantHandlerTest {
         final var request = new AuthorizationCodeAccessTokenRequest("123", RedirectUri.create("http://localhost:3000/callback"));
 
         // when
-        testable.handle(request)
+        testable.handle(request, oauth2Client)
                 .as(StepVerifier::create)
                 // then
                 .assertNext(accessToken -> {
@@ -53,6 +56,7 @@ class AuthorizationCodeGrantHandlerTest {
     @Test
     void shouldReturnErrorIfAuthorizationCodeDoesNotExist() {
         // given
+        final Oauth2RegisteredClient oauth2Client = Oauth2RegisteredClientFaker.create().get();
         final AuthorizationCodeGrantHandler testable = new AuthorizationCodeGrantHandler(
                 (code) -> Mono.empty(),
                 new MockOauth2AccessTokenGenerator("mocked")
@@ -60,9 +64,30 @@ class AuthorizationCodeGrantHandlerTest {
 
         final var request = new AuthorizationCodeAccessTokenRequest("123", RedirectUri.create("http://localhost:3000/callback"));
         // when
-        testable.handle(request)
+        testable.handle(request, oauth2Client)
                 .as(StepVerifier::create)
                 // then
                 .verifyError(InvalidAuthorizationCodeException.class);
+    }
+
+    @Test
+    void shouldReturnErrorIfClientIsDifferentFromTheOneWhoRequestAuthorizationCode() {
+        final AuthorizationCodeGrantHandler testable = new AuthorizationCodeGrantHandler(
+                (code) -> Mono.just(AuthorizationCodeMetadata.from(
+                        ResourceOwner.withPrincipalOnly("odeyalo"),
+                        Oauth2RegisteredClientFaker.create().get(),
+                        ScopeContainer.singleScope(SimpleScope.withName("read")),
+                        AuthorizationCodeClaims.empty()
+                )),
+                new OpaquePersistentOauth2AccessTokenGenerator(new InMemoryAccessTokenStore(), () -> Mono.just("mocked"))
+        );
+        final var request = new AuthorizationCodeAccessTokenRequest("123", RedirectUri.create("http://localhost:3000/callback"));
+
+        final Oauth2RegisteredClient differentClient = Oauth2RegisteredClientFaker.create().get();
+
+
+        testable.handle(request, differentClient)
+                .as(StepVerifier::create)
+                .verifyError(AuthorizationCodeStolenException.class);
     }
 }

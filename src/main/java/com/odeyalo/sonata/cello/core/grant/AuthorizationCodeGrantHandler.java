@@ -1,10 +1,12 @@
 package com.odeyalo.sonata.cello.core.grant;
 
+import com.odeyalo.sonata.cello.core.client.Oauth2RegisteredClient;
 import com.odeyalo.sonata.cello.core.responsetype.code.AuthorizationCodeMetadata;
 import com.odeyalo.sonata.cello.core.responsetype.code.support.AuthorizationCodeLoader;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessToken;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerationContext;
 import com.odeyalo.sonata.cello.core.token.access.Oauth2AccessTokenGenerator;
+import com.odeyalo.sonata.cello.exception.AuthorizationCodeStolenException;
 import com.odeyalo.sonata.cello.exception.InvalidAuthorizationCodeException;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -34,16 +36,28 @@ public final class AuthorizationCodeGrantHandler implements GrantHandler {
 
     @Override
     @NotNull
-    public Mono<AccessTokenResponse> handle(@NotNull final AccessTokenRequest accessTokenRequest) {
+    public Mono<AccessTokenResponse> handle(@NotNull final AccessTokenRequest accessTokenRequest,
+                                            @NotNull final Oauth2RegisteredClient client) {
 
         final AuthorizationCodeAccessTokenRequest codeRequest = (AuthorizationCodeAccessTokenRequest) accessTokenRequest;
         final String authorizationCode = codeRequest.getAuthorizationCode();
 
         return authorizationCodeLoader.loadUsing(authorizationCode)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(InvalidAuthorizationCodeException::defaultException)))
+                .flatMap(codeMetadata -> validate(client, authorizationCode, codeMetadata))
                 .map(AuthorizationCodeGrantHandler::createAccessTokenGenerationContext)
                 .flatMap(accessTokenGenerator::generateToken)
                 .map(AuthorizationCodeGrantHandler::createResponse);
+    }
+
+    @NotNull
+    private static Mono<AuthorizationCodeMetadata> validate(@NotNull final Oauth2RegisteredClient client,
+                                                            @NotNull final String authorizationCode,
+                                                            @NotNull final AuthorizationCodeMetadata codeMetadata) {
+        if ( codeMetadata.getGrantedFor().isSame(client) ) {
+            return Mono.just(codeMetadata);
+        }
+        return Mono.defer(() -> Mono.error(new AuthorizationCodeStolenException(authorizationCode)));
     }
 
     @NotNull

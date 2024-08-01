@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.cello.web;
 
+import com.odeyalo.sonata.cello.core.client.Oauth2RegisteredClient;
 import com.odeyalo.sonata.cello.core.grant.AccessTokenRequestConverter;
 import com.odeyalo.sonata.cello.core.grant.AccessTokenResponseConverter;
 import com.odeyalo.sonata.cello.core.grant.GrantHandler;
@@ -28,7 +29,7 @@ public final class TokenController {
     @PostMapping
     public Mono<Void> handlerAccessTokenRequest(@NotNull final ServerWebExchange exchange) {
         return accessTokenRequestConverter.convert(exchange)
-                .flatMap(grantHandler::handle)
+                .flatMap(request -> grantHandler.handle(request, Oauth2RegisteredClient.builder().build()))
                 .flatMap(it -> accessTokenResponseConverter.writeResponse(it, exchange));
     }
 }

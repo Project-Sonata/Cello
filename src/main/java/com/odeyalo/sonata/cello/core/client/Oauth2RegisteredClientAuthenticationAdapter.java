@@ -15,6 +15,10 @@ public class Oauth2RegisteredClientAuthenticationAdapter implements Authenticati
         this.oauth2RegisteredClient = oauth2RegisteredClient;
     }
 
+    public static Oauth2RegisteredClientAuthenticationAdapter wrapOauth2Client(final Oauth2RegisteredClient client) {
+        return new Oauth2RegisteredClientAuthenticationAdapter(client);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.emptyList();

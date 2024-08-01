@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Generic {@link AccessTokenRequestConverter} that converts any {@link AccessTokenResponse}
+ * Generic {@link AccessTokenResponseConverter} that converts any {@link AccessTokenResponse}
  */
 public final class GenericAccessTokenResponseConverter implements AccessTokenResponseConverter {
     private final ResponseWriter accessTokenResponseWriter;

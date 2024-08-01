@@ -55,6 +55,7 @@ public final class AuthorizationCodeGrantHandler implements GrantHandler {
                                                             @NotNull final String authorizationCode,
                                                             @NotNull final AuthorizationCodeMetadata codeMetadata) {
         if ( codeMetadata.getGrantedFor().isSame(client) ) {
+            System.out.println("validation successful");
             return Mono.just(codeMetadata);
         }
         return Mono.defer(() -> Mono.error(new AuthorizationCodeStolenException(authorizationCode)));

@@ -4,7 +4,8 @@ import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequest;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
 import com.odeyalo.sonata.cello.core.Scope;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import com.odeyalo.sonata.cello.core.responsetype.implicit.ImplicitOauth2AuthorizationRequest;
+import com.odeyalo.sonata.cello.exception.MissingAuthorizationRequestFlowIdException;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -21,20 +22,30 @@ public final class DefaultOauth2ConsentPageProvider implements Oauth2ConsentPage
 
     @Override
     @NotNull
-    public Mono<Void> getConsentPage(@NotNull Oauth2AuthorizationRequest request, @NotNull ResourceOwner resourceOwner, @NotNull ServerWebExchange httpExchange) {
-        ServerHttpResponse response = httpExchange.getResponse();
-        response.getHeaders().setContentType(MediaType.TEXT_HTML);
-        String flowId = httpExchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
+    public Mono<Void> getConsentPage(final @NotNull Oauth2AuthorizationRequest request,
+                                     final @NotNull ResourceOwner resourceOwner,
+                                     final @NotNull ServerWebExchange httpExchange) {
+        final ServerHttpResponse response = httpExchange.getResponse();
+        final String flowId = httpExchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
+        if ( StringUtils.isBlank(flowId) ) {
+            return Mono.error(
+                    MissingAuthorizationRequestFlowIdException.withCustomMessage("No flow_id present in request, can't process it")
+            );
+        }
 
+        final byte[] consentPageContent = getContent(request, resourceOwner, flowId);
+
+        response.getHeaders().setContentType(MediaType.TEXT_HTML);
         return response.writeWith(
-                Flux.just(response.bufferFactory().wrap(getContent(request, resourceOwner, flowId)))
+                Flux.just(response.bufferFactory().wrap(consentPageContent))
         );
     }
 
-    private static byte[] getContent(Oauth2AuthorizationRequest request, @NotNull ResourceOwner resourceOwner, String flowId) {
-        ImplicitOauth2AuthorizationRequest implicitOauth2AuthorizationRequest = (ImplicitOauth2AuthorizationRequest) request;
+    private static byte[] getContent(@NotNull final Oauth2AuthorizationRequest authorizationRequest,
+                                     @NotNull final ResourceOwner resourceOwner,
+                                     @NotNull final String flowId) {
 
-        StringBuilder htmlContent = new StringBuilder("<!DOCTYPE html>\n" +
+        final StringBuilder htmlContent = new StringBuilder("<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
                 "<head>\n" +
                 "    <meta charset=\"UTF-8\">\n" +
@@ -99,7 +110,7 @@ public final class DefaultOauth2ConsentPageProvider implements Oauth2ConsentPage
                 "    <form id=\"oauth2ConsentForm\" action=\"/oauth2/consent\" method=\"post\">\n" +
                 "<input type=\"hidden\" name=\"flow_id\" value=\"" + flowId + "\">");
 
-        for (Scope scope : implicitOauth2AuthorizationRequest.getScopes()) {
+        for (final Scope scope : authorizationRequest.getScopes()) {
             htmlContent.append("<label>\n")
                     .append("<input type=\"checkbox\" name=\"approved_scope\" value=\"")
                     .append(scope.getName())

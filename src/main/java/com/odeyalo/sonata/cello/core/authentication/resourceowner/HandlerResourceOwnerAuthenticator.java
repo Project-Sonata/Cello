@@ -24,19 +24,19 @@ public class HandlerResourceOwnerAuthenticator implements ResourceOwnerAuthentic
 
     private final Logger logger = LoggerFactory.getLogger(HandlerResourceOwnerAuthenticator.class);
 
-    public HandlerResourceOwnerAuthenticator(ResourceOwnerAuthenticationManager authenticationManager,
-                                             ResourceOwnerAuthenticationSuccessHandler successHandler,
-                                             ResourceOwnerAuthenticationFailureHandler failureHandler) {
+    public HandlerResourceOwnerAuthenticator(final ResourceOwnerAuthenticationManager authenticationManager,
+                                             final ResourceOwnerAuthenticationSuccessHandler successHandler,
+                                             final ResourceOwnerAuthenticationFailureHandler failureHandler) {
 
         this.authenticationManager = authenticationManager;
         this.successHandler = successHandler;
         this.failureHandler = failureHandler;
     }
 
-    public HandlerResourceOwnerAuthenticator(ResourceOwnerAuthenticationManager authenticationManager,
-                                             ResourceOwnerAuthenticationSuccessHandler successHandler,
-                                             ResourceOwnerAuthenticationFailureHandler failureHandler,
-                                             ServerSecurityContextRepository securityContextRepository) {
+    public HandlerResourceOwnerAuthenticator(final ResourceOwnerAuthenticationManager authenticationManager,
+                                             final ResourceOwnerAuthenticationSuccessHandler successHandler,
+                                             final ResourceOwnerAuthenticationFailureHandler failureHandler,
+                                             final ServerSecurityContextRepository securityContextRepository) {
         this.authenticationManager = authenticationManager;
         this.successHandler = successHandler;
         this.failureHandler = failureHandler;
@@ -45,9 +45,8 @@ public class HandlerResourceOwnerAuthenticator implements ResourceOwnerAuthentic
 
     @Override
     @NotNull
-    public Mono<ServerHttpResponse> authenticate(@NotNull ServerWebExchange webExchange) {
+    public Mono<ServerHttpResponse> authenticate(@NotNull final ServerWebExchange webExchange) {
         return authenticationManager.attemptAuthentication(webExchange)
-                .log()
                 .flatMap(authentication -> onAuthenticationSuccess(webExchange, authentication))
                 .thenReturn(webExchange.getResponse())
                 .onErrorResume(ResourceOwnerAuthenticationException.class,
@@ -56,10 +55,11 @@ public class HandlerResourceOwnerAuthenticator implements ResourceOwnerAuthentic
     }
 
     @NotNull
-    protected Mono<Void> onAuthenticationSuccess(@NotNull ServerWebExchange webExchange,
-                                                 @NotNull AuthenticatedResourceOwnerAuthentication authentication) {
-        SecurityContextImpl securityContext = new SecurityContextImpl();
-        securityContext.setAuthentication(authentication);
+    protected Mono<Void> onAuthenticationSuccess(@NotNull final ServerWebExchange webExchange,
+                                                 @NotNull final AuthenticatedResourceOwnerAuthentication authentication) {
+
+        final SecurityContextImpl securityContext = new SecurityContextImpl(authentication);
+
         return securityContextRepository.save(webExchange, securityContext)
                 .thenReturn(securityContext)
                 .doOnNext(unused -> logger.info("Saved the authentication to: {}", securityContextRepository))

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * POJO about client that has been registered in Cello.
  */
@@ -25,4 +27,13 @@ public class Oauth2RegisteredClient {
     @NotNull
     @Builder.Default
     RedirectUris allowedRedirectUris = RedirectUris.empty();
+
+    public boolean isSame(@NotNull final Oauth2RegisteredClient other) {
+        return Objects.equals(other.getCredentials().getClientId(), credentials.getClientId());
+
+    }
+
+    public boolean checkCredentials(@NotNull final Oauth2ClientCredentials otherCredentials) {
+        return credentials.equals(otherCredentials);
+    }
 }

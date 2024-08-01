@@ -5,4 +5,5 @@ package com.odeyalo.sonata.cello.core;
  */
 public final class DefaultOauth2ResponseTypes {
     public static final Oauth2ResponseType IMPLICIT = Oauth2ResponseType.create("token");
+    public static final Oauth2ResponseType AUTHORIZATION_CODE = Oauth2ResponseType.create("code");
 }

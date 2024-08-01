@@ -1,8 +1,5 @@
 package com.odeyalo.sonata.cello.core.responsetype.code;
 
-import com.odeyalo.sonata.cello.core.ScopeContainer;
-import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
-import com.odeyalo.sonata.cello.core.client.Oauth2RegisteredClient;
 import lombok.Builder;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +13,5 @@ public class GeneratedAuthorizationCode {
     @NotNull
     String codeValue;
     @NotNull
-    Oauth2RegisteredClient grantedFor;
-    @NotNull
-    ResourceOwner grantedBy;
-    @NotNull
-    @Builder.Default
-    ScopeContainer scopes = ScopeContainer.empty();
+    AuthorizationCodeMetadata metadata;
 }

@@ -43,10 +43,7 @@ public final class AuthorizationCodeResponseTypeHandler implements Oauth2Respons
         return registeredClientService.findByClientId(authorizationCodeRequest.getClientId())
                 .map(client -> createGenerationContext(authorizationCodeRequest, resourceOwner, client))
                 .flatMap(authorizationCodeGenerator::newAuthorizationCode)
-                .map(code -> AuthorizationCodeResponse.withAssociatedRequest(authorizationCodeRequest)
-                        .authorizationCode(code.getCodeValue())
-                        .build()
-                );
+                .map(code -> createResponse(authorizationCodeRequest, code));
     }
 
     @NotNull
@@ -57,6 +54,15 @@ public final class AuthorizationCodeResponseTypeHandler implements Oauth2Respons
                 .requestedScopes(authorizationCodeRequest.getScopes())
                 .grantedBy(resourceOwner)
                 .grantedFor(client)
+                .build();
+    }
+
+    @NotNull
+    private static AuthorizationCodeResponse createResponse(@NotNull final AuthorizationCodeRequest authorizationCodeRequest,
+                                                            @NotNull final GeneratedAuthorizationCode code) {
+        return AuthorizationCodeResponse
+                .withAssociatedRequest(authorizationCodeRequest)
+                .authorizationCode(code.getCodeValue())
                 .build();
     }
 }

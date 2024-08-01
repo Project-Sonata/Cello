@@ -1,7 +1,11 @@
 package com.odeyalo.sonata.cello.spring.autoconfigure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.odeyalo.sonata.cello.core.Oauth2AuthorizationRequestRepository;
+import com.odeyalo.sonata.cello.web.support.Jackson2ResponseWriter;
+import com.odeyalo.sonata.cello.web.support.ResponseWriter;
 import com.odeyalo.sonata.cello.web.support.AuthorizationRequestHandlerMethodArgumentResolver;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +22,13 @@ public class WebSupportConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuthorizationRequestHandlerMethodArgumentResolver authorizationRequestHandlerMethodArgumentResolver(Oauth2AuthorizationRequestRepository requestRepository) {
+    public AuthorizationRequestHandlerMethodArgumentResolver authorizationRequestHandlerMethodArgumentResolver(final Oauth2AuthorizationRequestRepository requestRepository) {
         return new AuthorizationRequestHandlerMethodArgumentResolver(requestRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ResponseWriter responseWriter(@NotNull final ObjectMapper objectMapper) {
+        return new Jackson2ResponseWriter(objectMapper);
     }
 }

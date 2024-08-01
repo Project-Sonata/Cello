@@ -2,6 +2,8 @@ package com.odeyalo.sonata.cello.support.view;
 
 import lombok.SneakyThrows;
 import org.javaync.io.AsyncFiles;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,8 @@ import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Locale;
 import java.util.Map;
 
@@ -31,15 +35,29 @@ public class HtmlViewResolver extends UrlBasedViewResolver {
 
         @Override
         @SneakyThrows
-        protected Mono<Void> renderInternal(Map<String, Object> renderAttributes, MediaType contentType, ServerWebExchange exchange) {
-            return Mono.fromFuture(AsyncFiles.readAllBytes(ResourceUtils.getFile(getUrl()).getPath()))
+        @NotNull
+        protected Mono<Void> renderInternal(@NotNull final Map<String, Object> renderAttributes,
+                                            @Nullable final MediaType contentType,
+                                            @NotNull final ServerWebExchange exchange) {
+            return Mono.fromFuture(AsyncFiles.readAllBytes(resolveView().getPath()))
                     .map(DefaultDataBufferFactory.sharedInstance::wrap)
                     .flatMap(buffer -> exchange.getResponse().writeWith(Mono.just(buffer)));
         }
 
         @Override
-        public boolean checkResourceExists(Locale locale) throws Exception {
-            return ResourceUtils.getFile(getUrl()).exists();
+        public boolean checkResourceExists(@NotNull final Locale locale) throws Exception {
+            return resolveView().exists();
+        }
+
+        @NotNull
+        private File resolveView() throws FileNotFoundException {
+            final String url = getUrl();
+
+            if ( url == null ) {
+                throw new FileNotFoundException("A file cannot be found for null URL");
+            }
+
+            return ResourceUtils.getFile(url);
         }
     }
 }

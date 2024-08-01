@@ -1,10 +1,11 @@
 package com.odeyalo.sonata.cello.core.responsetype.code;
 
+import com.odeyalo.sonata.cello.core.InMemoryAuthorizationCodeRepository;
 import com.odeyalo.sonata.cello.core.RedirectUri;
 import com.odeyalo.sonata.cello.core.authentication.resourceowner.ResourceOwner;
 import com.odeyalo.sonata.cello.core.client.Oauth2ClientCredentials;
 import com.odeyalo.sonata.cello.core.client.registration.InMemoryOauth2RegisteredClientService;
-import com.odeyalo.sonata.cello.core.responsetype.code.support.DefaultAuthorizationCodeGenerator;
+import com.odeyalo.sonata.cello.core.responsetype.code.support.DefaultAuthorizationCodeService;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 import testing.faker.Oauth2RegisteredClientFaker;
@@ -16,7 +17,7 @@ class AuthorizationCodeResponseTypeHandlerTest {
     @Test
     void shouldGenerateAuthorizationCodeOnPermissionGranted() {
         final AuthorizationCodeResponseTypeHandler testable = new AuthorizationCodeResponseTypeHandler(
-                new DefaultAuthorizationCodeGenerator(() -> "iLoveMiku"),
+                new DefaultAuthorizationCodeService(() -> "iLoveMiku", new InMemoryAuthorizationCodeRepository()),
                 new InMemoryOauth2RegisteredClientService(Oauth2RegisteredClientFaker.create()
                         .credentials(Oauth2ClientCredentials.withId("123")).get()));
 

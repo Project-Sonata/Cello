@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
@@ -33,9 +32,9 @@ public class Oauth2Controller {
 
     @GetMapping(value = "/authorize")
     @ResponseBody
-    public Mono<ResponseEntity<Void>> handleAuthorize(ServerWebExchange webExchange) {
+    public Mono<ResponseEntity<Void>> handleAuthorize(final ServerWebExchange webExchange) {
 
-        String flowId = webExchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
+        final String flowId = webExchange.getAttribute(Oauth2AuthorizationRequestRepository.CURRENT_FLOW_ATTRIBUTE_NAME);
 
         return Mono.just(
                 ResponseEntity.status(HttpStatus.FOUND)
@@ -45,7 +44,7 @@ public class Oauth2Controller {
     }
 
     @GetMapping(value = "/login")
-    public Mono<Void> handleLogin(ServerWebExchange exchange) {
+    public Mono<Void> handleLogin(final ServerWebExchange exchange) {
 
         return authenticationPageProvider.getAuthenticationPage(exchange)
                 .then();
@@ -53,30 +52,31 @@ public class Oauth2Controller {
 
 
     @PostMapping(value = "/login")
-    public Mono<ServerHttpResponse> handleLoginSubmission(ServerWebExchange exchange) {
+    public Mono<Void> handleLoginSubmission(final ServerWebExchange exchange) {
         return resourceOwnerAuthenticationManager.authenticate(exchange)
-                .log("Cello-Oauth2-Resource-Owner-Auth", Level.FINE);
+                .log("Cello-Oauth2-Resource-Owner-Auth", Level.FINE)
+                .then();
     }
 
     @GetMapping("/consent")
-    public Mono<Void> getConsentPage(Oauth2AuthorizationRequest request, AuthenticatedResourceOwnerAuthentication user, ServerWebExchange exchange) {
+    public Mono<Void> getConsentPage(final Oauth2AuthorizationRequest request, final AuthenticatedResourceOwnerAuthentication user, final ServerWebExchange exchange) {
 
         return oauth2ConsentPageProvider.getConsentPage(request, user.getResourceOwner(), exchange);
     }
 
     @GetMapping("/login/{providerName}")
-    public Mono<Void> thirdPartyAuthenticationProvider(@PathVariable String providerName, ServerWebExchange webExchange) {
+    public Mono<Void> thirdPartyAuthenticationProvider(@PathVariable final String providerName, final ServerWebExchange webExchange) {
         return oauth2AuthenticationManager.startOauth2Authentication(providerName, webExchange);
     }
 
     @GetMapping("/login/{providerName}/callback")
-    public Mono<Void> thirdPartyAuthenticationProviderCallback(@PathVariable String providerName, ServerWebExchange exchange) {
+    public Mono<Void> thirdPartyAuthenticationProviderCallback(@PathVariable final String providerName, final ServerWebExchange exchange) {
         return resourceOwnerAuthenticationManager.authenticate(exchange).then();
     }
 
     @PostMapping("/consent")
-    public Mono<Void> handleConsentSubmission(Oauth2AuthorizationRequest oauth2AuthorizationRequest, AuthenticatedResourceOwnerAuthentication authentication, ServerWebExchange webExchange) {
-        ResourceOwner resourceOwner = authentication.getResourceOwner();
+    public Mono<Void> handleConsentSubmission(final Oauth2AuthorizationRequest oauth2AuthorizationRequest, final AuthenticatedResourceOwnerAuthentication authentication, final ServerWebExchange webExchange) {
+        final ResourceOwner resourceOwner = authentication.getResourceOwner();
         return oauth2ConsentSubmissionHandler.handleConsentSubmission(oauth2AuthorizationRequest, resourceOwner, webExchange);
     }
 }

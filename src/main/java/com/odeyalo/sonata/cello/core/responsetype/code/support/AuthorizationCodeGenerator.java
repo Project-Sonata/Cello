@@ -10,19 +10,15 @@ import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
-/**
- * Generate a new {@link GeneratedAuthorizationCode} that can be exchanged for access token as described in
- * <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1">Authorization code</a>
- */
 public interface AuthorizationCodeGenerator {
     /**
-     * Generate a new {@link GeneratedAuthorizationCode} that can be exchanged for access token
+     * Generate a new {@link GeneratedAuthorizationCode} that later can be exchanged for an access token
      *
      * @param generationContext - an additional info that associated with this authorization code
      * @return = {@link Mono} with {@link GeneratedAuthorizationCode}
      */
     @NotNull
-    Mono<GeneratedAuthorizationCode> newAuthorizationCode(@NotNull AuthorizationCodeGenerationContext generationContext);
+    Mono<GeneratedAuthorizationCode> newAuthorizationCode(@NotNull AuthorizationCodeService.AuthorizationCodeGenerationContext generationContext);
 
     /**
      * Context for generating an authorization code

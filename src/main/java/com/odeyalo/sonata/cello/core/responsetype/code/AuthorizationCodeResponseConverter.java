@@ -21,7 +21,7 @@ public final class AuthorizationCodeResponseConverter implements Oauth2Authoriza
     public Mono<ServerHttpResponse> convert(@NotNull final Oauth2AuthorizationResponse<? extends Oauth2AuthorizationRequest> response,
                                             @NotNull final ServerWebExchange currentExchange) {
 
-        if ( !(response instanceof AuthorizationCodeResponse) ) {
+        if ( !(response instanceof AuthorizationCodeResponse authorizationCodeResponse) ) {
             return Mono.empty();
         }
 
@@ -30,7 +30,7 @@ public final class AuthorizationCodeResponseConverter implements Oauth2Authoriza
 
         final URI redirectUri = UriComponentsBuilder.fromUri(authorizationRequest.getRedirectUri().asUri())
                 .queryParam(STATE, authorizationRequest.getState())
-                .queryParam("code", "mocked")
+                .queryParam("code", authorizationCodeResponse.getAuthorizationCode())
                 .build()
                 .toUri();
 
